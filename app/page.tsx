@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 export default function Home() {
   return (
-   <main className='h-full w-screen bg-white text-black relative -mt-36'>
+   <main className='h-full w-screen bg-white text-black relative'>
         <div className='text-center absolute top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%]'>
         <span className='px-3 text-8xl font-bold text-gray-900 md:whitespace-nowrap'>Mann-Note</span>
         <p className='text-gray-500 text-base tracking-wider mt-3'>"Empower Your Productivity: Where Notes and Plans Unite!"</p>

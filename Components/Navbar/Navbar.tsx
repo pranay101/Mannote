@@ -21,7 +21,7 @@ type Props = {}
 
 const Navbar = (props: Props) => {
     return (
-        <nav className='sticky h-36 top-0 left-0 w-screen px-5 md:px-20 text-black flex justify-between items-center z-10 overflow-x-hidden'>
+        <nav className='absolute h-36 top-0 left-0 w-screen px-5 md:px-20 text-black flex justify-between items-center z-10 overflow-x-hidden'>
             <Image className='' src={"/Mannotelogo.svg"} height={100} width={150} alt='logo' />
 
             <NavigationMenu className='hidden md:flex'>
