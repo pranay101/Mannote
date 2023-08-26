@@ -18,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
         <body className={inter.className}>
-            <div className={"h-screen w-screen overflow-x-hidden relative"}>
+            <div className={"h-screen w-screen overflow-x-hidden"}>
             <Navbar />
                 {children}
             </div>
