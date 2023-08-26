@@ -1,6 +1,4 @@
-import Navbar from '@/Components/Navbar/Navbar'
 import { ArrowSmallRightIcon } from '@heroicons/react/20/solid'
-import Image from 'next/image'
 import Link from 'next/link'
 
 export default function Home() {
