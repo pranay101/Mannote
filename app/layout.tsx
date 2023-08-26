@@ -18,8 +18,8 @@ export default function RootLayout({
   return (
     <html lang="en">
         <body className={inter.className}>
-            <div className={"h-screen w-screen overflow-x-hidden"}>
             <Navbar />
+            <div className={"h-screen w-screen overflow-x-hidden"}>
                 {children}
             </div>
         </body>
