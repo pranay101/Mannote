@@ -6,23 +6,23 @@ import { Inter } from 'next/font/google'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Mannote - Your Goto Planner',
-  description: 'Notes app revolutionized',
+    title: 'Mannote - Your Goto Planner',
+    description: 'Notes app revolutionized',
 }
 
 export default function RootLayout({
-  children,
+    children,
 }: {
-  children: React.ReactNode
+    children: React.ReactNode
 }) {
-  return (
-    <html lang="en">
-        <body className={inter.className}>
-            <div className={"h-screen w-screen overflow-x-hidden"}>
-                <Navbar />
-                {children}
-            </div>
-        </body>
-    </html>
-  )
+    return (
+        <html lang="en">
+            <body className={inter.className} >
+                <div className='relative w-screen h-screen overflow-x-hidden'>
+                    <Navbar />
+                    {children}
+                </div>
+            </body>
+        </html>
+    )
 }
