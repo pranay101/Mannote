@@ -2,3 +2,48 @@
 @tailwind components;
 @tailwind utilities;
  
+/* Define the scrollbar styles for webkit browsers (Chrome, Safari) */
+::-webkit-scrollbar {
+    width: 5px; /* Set the width of the scrollbar */
+  }
+  
+  /* Define the thumb (handle) of the scrollbar */
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3); /* Set the background color of the thumb */
+    border-radius: 1px; /* Add rounded corners to the thumb */
+  }
+  
+  /* Define the track (background) of the scrollbar */
+  ::-webkit-scrollbar-track {
+    background: transparent; /* Set the background color of the track */
+  }
+  
+  /* Define the scrollbar styles for Firefox */
+  /* Note: Firefox doesn't support styling the thumb and track separately */
+  /* You can apply a general style for all Firefox browsers */
+  /* Or you can use a JavaScript library like "SimpleBar" for better customization in Firefox */
+  
+  /* Define the scrollbar styles for Internet Explorer */
+  /* Note: Internet Explorer supports only basic scrollbar styling, limited customization */
+  /* You can use the "-ms-overflow-style" property to further control the scrollbar */
+  
+
+  .ql-container{
+    border: none !important;
+  }
+
+  #canvas{
+    background: url("../public/CanvasBackground.svg");
+    background-repeat: repeat;
+    background-position: center;
+
+    min-height:100vh;
+    height: 150vh;
+    width: 150vw !important;
+    overflow-y: scroll !important;
+  }
+
+  .ql-editor{
+    font-family: inter;
+    font-weight: 500;
+}
