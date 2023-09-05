@@ -11,7 +11,7 @@ const Navbar = (props: Props) => {
     const [openMenu,setOpenMenu] = useState(false)
     return (<>
     <nav className='absolute h-36 top-0 left-0 w-screen px-5 md:px-20 text-black flex justify-between items-center z-50 overflow-hidden'>
-            <Image className='' src={"/Mannotelogo.svg"} height={100} width={150} alt='logo' />
+            <Image className='' src={"/MannoteLogo.png"} height={100} width={150} alt='logo' />
             <div className='hidden md:flex text-sm uppercase font-normal text-black tracking-widest items-center'>
                 <Link className='border-b-2 border-transparent hover:border-b-2 hover:border-gray-300 mx-5' href={""}>Pricing</Link>
                 <Link className='border-b-2 border-transparent hover:border-b-2 hover:border-gray-300 mx-5' href={""}>About</Link>

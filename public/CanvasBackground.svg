@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 26.3.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 1920 1080" style="enable-background:new 0 0 1920 1080;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:none;}
+	.st1{opacity:0.12;fill:url(#SVGID_1_);enable-background:new    ;}
+</style>
+<pattern  y="1080" width="114" height="114" patternUnits="userSpaceOnUse" id="New_Pattern" viewBox="0 -114 114 114" style="overflow:visible;">
+	<g>
+		<rect y="-114" class="st0" width="114" height="114"/>
+		<rect y="-114" class="st0" width="114" height="114"/>
+		<circle cx="82.3" cy="-95" r="4"/>
+		<circle cx="44.3" cy="-95" r="4"/>
+		<circle cx="6.3" cy="-95" r="4"/>
+		<circle cx="95" cy="-57" r="4"/>
+		<circle cx="57" cy="-57" r="4"/>
+		<circle cx="19" cy="-57" r="4"/>
+		<circle cx="107.7" cy="-19" r="4"/>
+		<circle cx="69.7" cy="-19" r="4"/>
+		<circle cx="31.7" cy="-19" r="4"/>
+	</g>
+</pattern>
+<pattern  id="SVGID_1_" xlink:href="#New_Pattern" patternTransform="matrix(1 0 0 -1 0 -16612)">
+</pattern>
+<rect class="st1" width="1920" height="1080"/>
+</svg>
