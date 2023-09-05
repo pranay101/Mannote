@@ -32,6 +32,9 @@ const Card: React.FC<Card> = ({
 
     
     useEffect(() => {
+        if(!document){
+            return
+        }
         const handleMouseUp = () => {
             setIsDragging(false)
         }
@@ -57,7 +60,7 @@ const Card: React.FC<Card> = ({
             document.removeEventListener('mousemove', handleMouseMove)
             document.removeEventListener('mouseup', handleMouseUp)
         }
-    }, [isDragging])
+    }, [isDragging,document])
 
     // Update the recoil atom whenever the content changes
     useEffect(() => {
