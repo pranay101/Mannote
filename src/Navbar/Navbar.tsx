@@ -33,13 +33,9 @@ const Navbar = (props: Props) => {
                     >
                         About
                     </Link>
-                    {window.location.pathname === '/Login' ? (
-                        null
-                    ) : (
                         <span className="flex items-center mx-5 px-5 py-1.5 rounded-[5px] font-semibold border-2 hover:bg-gray-900 hover:text-white">
                             <Link href="/Login">Login</Link>
                         </span>
-                    )}
                 </div>
 
                 <Bars3Icon

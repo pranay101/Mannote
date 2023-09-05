@@ -7,10 +7,6 @@ import { RecoilRoot } from 'recoil'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata: Metadata = {
-    title: 'Mannote - Your Goto Planner',
-    description: 'Notes app revolutionized',
-}
 
 export default function RootLayout({
     children,
@@ -19,6 +15,9 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en">
+            <head>
+                <title>Mannote - Your Goto Planner</title>
+            </head>
             <body className={inter.className}>
                 <div className="relative w-screen h-screen overflow-x-hidden">
                     <RecoilRoot>
