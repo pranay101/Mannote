@@ -30,21 +30,21 @@ const Card: React.FC<Card> = ({
         }
     }
 
-    const handleMouseUp = () => {
-        setIsDragging(false)
-    }
-
-    const handleMouseMove = (e: MouseEvent) => {
-        if (isDragging) {
-            const card = document.getElementById(id)
-            if (card) {
-                card.style.top = e.clientY - dragOffset.y + 'px'
-                card.style.left = e.clientX - dragOffset.x + 'px'
+    
+    useEffect(() => {
+        const handleMouseUp = () => {
+            setIsDragging(false)
+        }
+    
+        const handleMouseMove = (e: MouseEvent) => {
+            if (isDragging) {
+                const card = document.getElementById(id)
+                if (card) {
+                    card.style.top = e.clientY - dragOffset.y + 'px'
+                    card.style.left = e.clientX - dragOffset.x + 'px'
+                }
             }
         }
-    }
-
-    useEffect(() => {
         if (isDragging) {
             document.addEventListener('mousemove', handleMouseMove)
             document.addEventListener('mouseup', handleMouseUp)
