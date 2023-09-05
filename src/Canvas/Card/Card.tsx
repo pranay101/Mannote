@@ -5,27 +5,21 @@ import Draggable from 'react-draggable'
 import 'react-quill/dist/quill.snow.css'
 import {  } from '@heroicons/react/24/outline'
 import { ArrowsRightLeftIcon,XMarkIcon } from '@heroicons/react/20/solid'
+import { Card } from '@/Config/typings'
 
-interface CardProps {
-    initialText?: string
-    id: any
-    x: number
-    y: number,
-    onCardCloseHandler:Function,
-}
-
-const Card: React.FC<CardProps> = ({
+const Card: React.FC<Card> = ({
     initialText = 'Start Writing...',
     id,
     x,
     y,
     onCardCloseHandler,
+    updateCardContent
 }) => {
     const [markdownText, setMarkdownText] = useState<string>(initialText)
     const [isDragging, setIsDragging] = useState(false)
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
 
-    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleMouseDown = (e: React.MouseEvent<SVGSVGElement>) => {
         setIsDragging(true)
         const cardRect = e.currentTarget.parentElement?.getBoundingClientRect()
         if (cardRect) {
@@ -65,6 +59,11 @@ const Card: React.FC<CardProps> = ({
         }
     }, [isDragging])
 
+    // Update the recoil atom whenever the content changes
+    useEffect(() => {
+        updateCardContent(id,markdownText)
+    }, [markdownText])
+
     return (
         <Draggable disabled>
             <div
@@ -72,10 +71,14 @@ const Card: React.FC<CardProps> = ({
                 id={id}
                 className="bg-white rounded-sm"
             >
-                <div className='flex justify-between items-center h-10 font-medium text-sm px-5 py-2 text-gray-500 bg-gray-200'>
-                    <ArrowsRightLeftIcon title='Hold to Drag' onMouseDown={handleMouseDown} className='h-6 w-6 cursor-move drag-handle' />
+                <div className="flex justify-between items-center h-10 font-medium text-sm px-5 py-2 text-gray-500 bg-gray-200">
+                    <ArrowsRightLeftIcon
+                        title="Hold to Drag"
+                        onMouseDown={handleMouseDown}
+                        className="h-6 w-6 cursor-move drag-handle"
+                    />
                     <div
-                        className='flex items-center focus:outline-none'
+                        className="flex items-center focus:outline-none"
                         contentEditable
                         suppressContentEditableWarning
                         data-gramm="false"
@@ -84,9 +87,12 @@ const Card: React.FC<CardProps> = ({
                     >
                         Card Title
                     </div>
-                    <div className='inline-flex gap-3'>
-                       
-                        <XMarkIcon onClick={() => onCardCloseHandler(id)} title='Hold to Drag' className='h-6 w-6 cursor-pointer' />
+                    <div className="inline-flex gap-3">
+                        <XMarkIcon
+                            onClick={() => onCardCloseHandler(id)}
+                            title="Hold to Drag"
+                            className="h-6 w-6 cursor-pointer"
+                        />
                         {/* <XMarkIcon title='Close card'/> */}
                     </div>
                 </div>
