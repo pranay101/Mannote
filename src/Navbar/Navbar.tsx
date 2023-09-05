@@ -2,7 +2,6 @@
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 
@@ -10,8 +9,6 @@ type Props = {}
 
 const Navbar = (props: Props) => {
     const [openMenu,setOpenMenu] = useState(false)
-    const router = useRouter()
-    
     return (
         <>
             <nav className="absolute h-36 top-0 left-0 w-screen px-5 md:px-20 text-black flex justify-between items-center z-50 overflow-hidden">
