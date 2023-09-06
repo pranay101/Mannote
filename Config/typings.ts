@@ -27,3 +27,7 @@ export type toolTip = {
     position: 'top' | 'bottom' | 'right' | 'left',
     title : string,
 }
+
+export type userSchema = {
+    moodBoardTitle?: string,
+}

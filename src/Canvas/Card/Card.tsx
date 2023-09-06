@@ -97,7 +97,7 @@ const Card: React.FC<Card> = ({
                         data-gramm_editor="false"
                         data-enable-grammarly="false"
                         onBlur={(e) =>
-                            updateCard(id, 'cardTitle', e.target.innerHTML)
+                            updateCard(id, 'cardTitle', e.target.innerText)
                         }
                     >
                         {cardTitle}

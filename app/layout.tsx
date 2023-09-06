@@ -1,9 +1,10 @@
 'use client'
 import Navbar from '@/src/Navbar/Navbar'
-import '../globals.css'
+import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { RecoilRoot } from 'recoil'
+import { usePathname } from 'next/navigation'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -12,6 +13,8 @@ export default function RootLayout({
 }: {
     children: React.ReactNode
 }) {
+
+    const path = usePathname()
     return (
         <html lang="en">
             <head>
@@ -21,7 +24,7 @@ export default function RootLayout({
             <body className={inter.className}>
                 <div className="relative w-screen h-screen overflow-x-hidden">
                     <RecoilRoot>
-                        <Navbar />
+                {path !== '/dashboard' && <Navbar />}
                         {children}
                     </RecoilRoot>
                 </div>

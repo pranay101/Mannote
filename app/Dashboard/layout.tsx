@@ -2,22 +2,18 @@
 import { RecoilRoot } from 'recoil'
 import '../globals.css'
 
-export default function RootLayout({
-    children,
-}: {
-    children: React.ReactNode
-}) {
-    return (
-        <html lang="en">
-            <head>
-             <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
-             <title>DashBoard</title>
-            </head>
-            <body>
-                <div className="relative w-screen h-screen overflow-x-hidden">
-                    <RecoilRoot>{children}</RecoilRoot>
-                </div>
-            </body>
-        </html>
-    )
+
+// app/DashboardLayout.tsx
+import { ReactNode } from 'react';
+
+interface DashboardLayoutProps {
+  children: ReactNode;
+}
+
+export default function DashboardLayout({ children }: DashboardLayoutProps) {
+  return (
+    <div className="relative w-screen h-screen overflow-x-hidden">
+    <RecoilRoot>{children}</RecoilRoot>
+</div>
+  );
 }
