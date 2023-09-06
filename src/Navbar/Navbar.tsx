@@ -78,6 +78,12 @@ const Navbar = (props: Props) => {
                     </Link>
                     <Link
                         className="border-b-2 text-lg border-transparent hover:border-b-2 hover:border-gray-300 my-5"
+                        href={'/dashboard'}
+                    >
+                        Dashboard
+                    </Link>
+                    <Link
+                        className="border-b-2 text-lg border-transparent hover:border-b-2 hover:border-gray-300 my-5"
                         href={''}
                     >
                         Login
