@@ -1,85 +1,94 @@
+'use client'
+import { cardsAtom } from '@/Config/RecoilConfig'
+import { Card, DraggableData } from '@/Config/typings'
+import {} from '@heroicons/react/24/outline'
 import React, { useEffect, useState } from 'react'
-import ReactMarkdown from 'react-markdown'
-import ReactQuill from 'react-quill'
-import Draggable from 'react-draggable'
+import Draggable, { DraggableEventHandler } from 'react-draggable'
 import 'react-quill/dist/quill.snow.css'
-import {  } from '@heroicons/react/24/outline'
-import { ArrowsRightLeftIcon,XMarkIcon } from '@heroicons/react/20/solid'
-import { Card } from '@/Config/typings'
+import { useRecoilState } from 'recoil'
 
+import CloseIcon from '@mui/icons-material/Close'
+import ControlCameraIcon from '@mui/icons-material/ControlCamera'
+import { IconButton } from '@mui/material'
+import dynamic from 'next/dynamic'
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false })
 const Card: React.FC<Card> = ({
     initialText = 'Start Writing...',
     id,
     x,
     y,
-    onCardCloseHandler,
-    updateCardContent
+    cardTitle,
+    content,
 }) => {
-    const [markdownText, setMarkdownText] = useState<string>(initialText)
-    const [isDragging, setIsDragging] = useState(false)
-    const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+    const [markdownText, setMarkdownText] = useState<string>(content)
+    const [cards, setCards] = useRecoilState(cardsAtom)
 
-    const handleMouseDown = (e: React.MouseEvent<SVGSVGElement>) => {
-        setIsDragging(true)
-        const cardRect = e.currentTarget.parentElement?.getBoundingClientRect()
-        if (cardRect) {
-            setDragOffset({
-                x: e.clientX - cardRect.left,
-                y: e.clientY - cardRect.top,
-            })
+    const updateCardPosition: DraggableEventHandler = (
+        e,
+        data: DraggableData
+    ) => {
+        const index = cards.findIndex((card) => card.id === id)
+        const xCordinate = data.x
+        const yCordinate = data.y
+        if (index !== -1) {
+            const updatedCardList = [...cards]
+            updatedCardList[index] = {
+                ...updatedCardList[index],
+                x: xCordinate,
+                y: yCordinate,
+            }
+            setCards(updatedCardList)
         }
     }
-
-    
-    useEffect(() => {
-        if(!document){
+    const closeCardHandler = (cardId: string) => {
+        if (!cardId) {
             return
         }
-        const handleMouseUp = () => {
-            setIsDragging(false)
+        const newArrayOfCards = cards.filter((card) => card.id !== cardId)
+        setCards(newArrayOfCards)
+    }
+    const updateCard = (
+        cardId: string,
+        field: 'cardTitle' | 'content',
+        content: string = ''
+    ) => {
+        if (!cardId) {
+            return
         }
-    
-        const handleMouseMove = (e: MouseEvent) => {
-            if (isDragging) {
-                const card = document.getElementById(id)
-                if (card) {
-                    card.style.top = e.clientY - dragOffset.y + 'px'
-                    card.style.left = e.clientX - dragOffset.x + 'px'
+        const index = cards.findIndex((card) => card.id === cardId)
+
+        if (index !== -1) {
+            const updatedCardList = [...cards]
+            if (field === 'cardTitle') {
+                updatedCardList[index] = {
+                    ...updatedCardList[index],
+                    cardTitle: content,
                 }
             }
+            if (field === 'content') {
+                updatedCardList[index] = {
+                    ...updatedCardList[index],
+                    content: content,
+                }
+            }
+            setCards(updatedCardList)
         }
-        if (isDragging) {
-            document.addEventListener('mousemove', handleMouseMove)
-            document.addEventListener('mouseup', handleMouseUp)
-        } else {
-            document.removeEventListener('mousemove', handleMouseMove)
-            document.removeEventListener('mouseup', handleMouseUp)
-        }
-
-        return () => {
-            document.removeEventListener('mousemove', handleMouseMove)
-            document.removeEventListener('mouseup', handleMouseUp)
-        }
-    }, [isDragging,document])
-
-    // Update the recoil atom whenever the content changes
+    }
     useEffect(() => {
-        updateCardContent(id,markdownText)
+        updateCard(id, 'content', markdownText)
     }, [markdownText])
 
     return (
-        <Draggable disabled>
-            <div
-                style={{ position: 'absolute', top: y, left: x }}
-                id={id}
-                className="bg-white rounded-sm"
-            >
-                <div className="flex justify-between items-center h-10 font-medium text-sm px-5 py-2 text-gray-500 bg-gray-200">
-                    <ArrowsRightLeftIcon
-                        title="Hold to Drag"
-                        onMouseDown={handleMouseDown}
-                        className="h-6 w-6 cursor-move drag-handle"
-                    />
+        <Draggable
+            // defaultPosition={{ x: x, y: y }}
+            position={{ x: x, y: y }}
+            handle=".drag-handle"
+            onDrag={updateCardPosition}
+            bounds={{left:5}}
+        >
+            <div id={id} className="bg-white rounded-sm h-fit absolute">
+                <div className="flex justify-between items-center h-10 font-medium text-sm px-2 py-2 text-gray-500 bg-gray-200">
+                    <ControlCameraIcon className="h-6 w-6 cursor-move drag-handle" />
                     <div
                         className="flex items-center focus:outline-none"
                         contentEditable
@@ -87,16 +96,16 @@ const Card: React.FC<Card> = ({
                         data-gramm="false"
                         data-gramm_editor="false"
                         data-enable-grammarly="false"
+                        onBlur={(e) =>
+                            updateCard(id, 'cardTitle', e.target.innerHTML)
+                        }
                     >
-                        Card Title
+                        {cardTitle}
                     </div>
                     <div className="inline-flex gap-3">
-                        <XMarkIcon
-                            onClick={() => onCardCloseHandler(id)}
-                            title="Hold to Drag"
-                            className="h-6 w-6 cursor-pointer"
-                        />
-                        {/* <XMarkIcon title='Close card'/> */}
+                        <IconButton onClick={() => closeCardHandler(id)}>
+                            <CloseIcon />
+                        </IconButton>
                     </div>
                 </div>
 
@@ -107,7 +116,7 @@ const Card: React.FC<Card> = ({
                             background: 'white',
                             padding: '0px',
                             minHeight: '100px',
-                            height: 'auto',
+                            height: 'fitContent',
                             width: '300px',
                             overflow: 'auto',
                             border: 'none',

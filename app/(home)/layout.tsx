@@ -7,7 +7,6 @@ import { RecoilRoot } from 'recoil'
 
 const inter = Inter({ subsets: ['latin'] })
 
-
 export default function RootLayout({
     children,
 }: {
@@ -17,6 +16,7 @@ export default function RootLayout({
         <html lang="en">
             <head>
                 <title>Mannote - Your Goto Planner</title>
+                <link rel="icon" href="favicon.ico" sizes="" />
             </head>
             <body className={inter.className}>
                 <div className="relative w-screen h-screen overflow-x-hidden">

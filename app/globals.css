@@ -47,3 +47,10 @@
     font-family: inter;
     font-weight: 500;
 }
+
+
+@layer components{
+    .tool{
+        @apply w-12 h-12 shadow-md rounded-md mx-auto bg-gray-200 cursor-pointer p-2 aspect-square flex items-center justify-center
+    }
+}
