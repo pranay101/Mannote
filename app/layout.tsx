@@ -24,7 +24,7 @@ export default function RootLayout({
             <body className={inter.className}>
                 <div className="relative w-screen h-screen overflow-x-hidden">
                     <RecoilRoot>
-                {path !== '/dashboard' && <Navbar />}
+                {path !== '/Dashboard' && <Navbar />}
                         {children}
                     </RecoilRoot>
                 </div>
