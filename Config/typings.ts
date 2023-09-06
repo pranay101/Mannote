@@ -1,7 +1,7 @@
 export interface CardProps {
     cardTitle:string,
     initialText?: string;
-    id: any;
+    id: string;
     x: number;
     y: number;
     content?:any
@@ -9,10 +9,21 @@ export interface CardProps {
 
   export interface Card{
     initialText?: string
-    id: any
+    id: string
     x: number
     y: number,
-    onCardCloseHandler:Function,
-    updateCardContent:Function,
     cardTitle:string,
+    content?:any
+}
+
+export type DraggableData = {
+    node: HTMLElement,
+    x: number, y: number,
+    deltaX: number, deltaY: number,
+    lastX: number, lastY: number
+  };
+
+export type toolTip = {
+    position: 'top' | 'bottom' | 'right' | 'left',
+    title : string,
 }

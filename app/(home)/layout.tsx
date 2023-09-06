@@ -7,7 +7,11 @@ import { RecoilRoot } from 'recoil'
 
 const inter = Inter({ subsets: ['latin'] })
 
-
+export const metadata: Metadata = {
+    title: 'Mannote - Your Goto Planner',
+    description: 'Notes app revolutionized',
+  }
+  
 export default function RootLayout({
     children,
 }: {

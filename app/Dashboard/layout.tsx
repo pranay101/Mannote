@@ -11,6 +11,7 @@ export default function RootLayout({
         <html lang="en">
             <head>
              <link rel="shortcut icon" href="/vercel.svg" type="image/x-icon" />
+             <title>DashBoard</title>
             </head>
             <body>
                 <div className="relative w-screen h-screen overflow-x-hidden">
