@@ -64,7 +64,7 @@ const Canvas = (props: Props) => {
     }
     return (
         <div id="canvas" className="h-full w-full flex justify-between">
-            <div className="w-[5vw] h-full bg-gray-300 px-2 py-10 border-r-2 border-r-gray-300 shadow-lg space-y-5">
+            <div className="w-[5vw] min-w-[70px] h-full bg-gray-300 px-2 py-10 border-r-2 border-r-gray-300 shadow-lg space-y-5">
                 <div className="tool">
                 <Tooltip placement='right' title="Add New Card">
                         <IconButton onClick={addNewCardHandler}>

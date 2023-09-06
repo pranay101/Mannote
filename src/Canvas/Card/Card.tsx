@@ -84,6 +84,7 @@ const Card: React.FC<Card> = ({
             position={{ x: x, y: y }}
             handle=".drag-handle"
             onDrag={updateCardPosition}
+            bounds={{left:5}}
         >
             <div id={id} className="bg-white rounded-sm h-fit absolute">
                 <div className="flex justify-between items-center h-10 font-medium text-sm px-2 py-2 text-gray-500 bg-gray-200">
