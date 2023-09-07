@@ -16,10 +16,10 @@ export default function Home() {
         {/* <Image className='absolute bottom-0 left-10 opacity-50' src={"/background.svg"}height={500} width={500} alt='productivity' /> */}
         <div className='border-t h-20 w-full absolute bottom-0 left-0 flex justify-between text-sm text-gray-500 items-center px-8 md:px-24'>
             <span>
-                <Link href={""}>Share Feedback</Link>
+                <Link href={"/Feeback"}>Share Feedback</Link>
             </span>
             <p>All rights Reserved</p>
-                <Link href={"#"}>Github</Link>          
+                <Link href={"https://github.com/pranay101/Mannote"}>Github</Link>          
         </div>    
    </main>
   )
