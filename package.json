@@ -32,6 +32,7 @@
     "react-hot-toast": "^2.4.1",
     "react-markdown": "^8.0.7",
     "react-quill": "^2.0.0",
+    "react-sketch-canvas": "^6.2.0",
     "react-xarrows": "^2.0.2",
     "recoil": "^0.7.7",
     "tailwindcss": "3.3.3",
