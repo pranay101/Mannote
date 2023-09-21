@@ -21,7 +21,7 @@ const Login = async () => {
                     Home
                 </Button>
             </nav>
-            <section className="absolute top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%] h-[60vh] min-w-[400px] w-[25vw] bg-gray-100 shadow-md px-5 py-8">
+            <section className="w-[90vw] absolute top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%] h-[60vh] md:min-w-[400px] md:w-[25vw] bg-gray-100 shadow-md px-5 py-8">
                 <h1 className="text-4xl text-center">Login</h1>
                 <p className="text-xs p-2 text-gray-500 font-light text-center">
                     Current we support the following <br /> login poviders.
