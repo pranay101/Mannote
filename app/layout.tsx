@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { RecoilRoot } from 'recoil'
 import { usePathname } from 'next/navigation'
+import { SessionProvider } from 'next-auth/react'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -13,7 +14,6 @@ export default function RootLayout({
 }: {
     children: React.ReactNode
 }) {
-
     const path = usePathname()
     return (
         <html lang="en">
@@ -23,16 +23,21 @@ export default function RootLayout({
             </head>
             <body className={inter.className}>
                 <div className="relative w-screen h-screen overflow-x-hidden">
-                    <RecoilRoot>
-                {!['/Dashboard','/dashboard'].includes(path) && <Navbar />}
-                        {children}
-                    </RecoilRoot>
+                    <SessionProvider>
+                        <RecoilRoot>
+                            {!['/Dashboard', '/dashboard','/Login','/login'].includes(path) && (
+                                <Navbar />
+                            )}
+                            {children}
+                        </RecoilRoot>
+                    </SessionProvider>
                 </div>
             </body>
         </html>
     )
 }
 
-
 // page
-{/* <layout>page<layout> */}
+{
+    /* <layout>page<layout> */
+}
