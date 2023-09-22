@@ -1,15 +1,22 @@
 'use client'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { Button } from '@mui/material'
-import { getProviders, signIn } from 'next-auth/react'
+import { signIn, useSession } from 'next-auth/react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 type Props = {}
 
-const Login = async () => {
+const Login = () => {
     const router = useRouter()
-    const providers = await getProviders(); 
+    const {data:session} = useSession();
+
+    useEffect(() =>{
+        if(session){
+            router.push("/Dashboard")
+        }
+    },[session])
     return (
         <main className="h-screen w-screen relative ">
             <nav className="bg-gray-100 h-16 w-full flex items-center px-10">
@@ -27,12 +34,14 @@ const Login = async () => {
                     Current we support the following <br /> login poviders.
                 </p>
 
-                <div
-                    className="flex items-center gap-3 bg-white p-4 hover:bg-gray-50 cursor-pointer mt-10"
-                    onClick={() => signIn("google",{
-                        redirect:true,
-                        callbackUrl: '/',
-                    })}
+                <button
+                    className="flex items-center gap-4 bg-white p-4 hover:bg-gray-50 cursor-pointer mt-10 w-full"
+                    onClick={() =>
+                        signIn('google', {
+                            redirect: true,
+                            callbackUrl: '/',
+                        })
+                    }
                 >
                     <Image
                         src={
@@ -43,14 +52,14 @@ const Login = async () => {
                         alt="google"
                         className="h-10 w-10 aspect-square"
                     />
-                    <span>
+                    <span className="text-left">
                         <h2>Login with Google</h2>
                         <h4 className="text-sm">User</h4>
                     </span>
-                </div>
-                <div
-                    className="flex items-center gap-3 bg-gray-200  p-4 cursor-not-allowed mt-5"
-                
+                </button>
+                <button
+                    className="flex items-center gap-4 bg-white p-4 hover:bg-gray-50 cursor-not-allowed mt-5 w-full"
+                    disabled={true}
                 >
                     <Image
                         src={
@@ -61,11 +70,11 @@ const Login = async () => {
                         alt="Github"
                         className="h-10 w-10 aspect-square"
                     />
-                    <span>
+                    <span className="text-left">
                         <h2>Login with Github</h2>
-                        <h4 className="text-sm">User</h4>
+                        <h4 className="text-sm">User (disabled)</h4>
                     </span>
-                </div>
+                </button>
             </section>
         </main>
     )
