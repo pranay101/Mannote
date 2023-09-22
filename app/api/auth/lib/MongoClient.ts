@@ -8,16 +8,8 @@ if (!process.env.MONGODB_URI) {
 const uri = process.env.MONGODB_URI;
 const options = {};
 
-
-export async function getMongoClient() {
-    const client = new MongoClient(process.env.MONGODB_URI!, {});
-    await client.connect();
-    return client;
-}
-
 let client;
 let clientPromise: Promise<MongoClient>;
-
 
 // In production mode, it's best to not use a global variable.
 client = new MongoClient(uri, options);
