@@ -6,6 +6,7 @@ import { Inter } from 'next/font/google'
 import { RecoilRoot } from 'recoil'
 import { usePathname } from 'next/navigation'
 import { Analytics } from '@vercel/analytics/react';
+import { SessionProvider } from 'next-auth/react'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -14,7 +15,6 @@ export default function RootLayout({
 }: {
     children: React.ReactNode
 }) {
-
     const path = usePathname()
     return (
         <html lang="en">
@@ -24,17 +24,22 @@ export default function RootLayout({
             </head>
             <body className={inter.className}>
                 <div className="relative w-screen h-screen overflow-x-hidden">
-                    <RecoilRoot>
-                {!['/Dashboard','/dashboard'].includes(path) && <Navbar />}
-                        {children}
-                        <Analytics />
-                    </RecoilRoot>
+                    <SessionProvider>
+                        <RecoilRoot>
+                            {!['/Dashboard', '/dashboard','/Login','/login'].includes(path) && (
+                                <Navbar />
+                            )}
+                            {children}
+                            <Analytics />
+                        </RecoilRoot>
+                    </SessionProvider>
                 </div>
             </body>
         </html>
     )
 }
 
-
 // page
-{/* <layout>page<layout> */}
+{
+    /* <layout>page<layout> */
+}
