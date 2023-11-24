@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { RecoilRoot } from 'recoil'
 import { usePathname } from 'next/navigation'
+import { Analytics } from '@vercel/analytics/react';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -26,6 +27,7 @@ export default function RootLayout({
                     <RecoilRoot>
                 {!['/Dashboard','/dashboard'].includes(path) && <Navbar />}
                         {children}
+                        <Analytics />
                     </RecoilRoot>
                 </div>
             </body>
