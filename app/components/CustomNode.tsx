@@ -36,11 +36,10 @@ export default function CustomNode({
   data,
   selected,
 }: NodeProps<CustomNodeData>) {
-  const [isActive, setIsActive] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [editableDetails, setEditableDetails] = useState<string[]>(
     data.details
   );
-  const [showDeleteButton, setShowDeleteButton] = useState(false);
   const [newItem, setNewItem] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const contentAreaRef = useRef<HTMLDivElement>(null);
@@ -65,27 +64,55 @@ export default function CustomNode({
         data.onUpdate(id, { html: editor.getHTML() });
       }
     },
-    editorProps: {
-      attributes: {
-        class:
-          "prose prose-xs focus:outline-none min-h-[100px] max-w-none text-gray-600 text-xs",
-      },
-      handlePaste: (view, event) => {
-        // Let our custom paste handler deal with images
-        if (event.clipboardData && event.clipboardData.files.length > 0) {
-          return true; // Return true to let our custom handler take over
-        }
-        return false; // Let TipTap handle other paste events
-      },
-    },
+    editable: false, // Start as non-editable
   });
 
-  // Focus editor when card becomes active
+  // Update editor editable state when isEditing changes
   useEffect(() => {
-    if (isActive && editor) {
-      editor.commands.focus();
+    if (editor) {
+      editor.setEditable(isEditing);
     }
-  }, [isActive, editor]);
+  }, [isEditing, editor]);
+
+  // Handle card click - if already selected, enter edit mode
+  const handleCardClick = () => {
+    if (selected && !isEditing) {
+      setIsEditing(true);
+    }
+  };
+
+  // Focus editor when entering edit mode
+  useEffect(() => {
+    if (isEditing && editor) {
+      setTimeout(() => {
+        editor.commands.focus("end");
+      }, 10);
+    }
+  }, [isEditing, editor]);
+
+  // Exit edit mode when card is no longer selected
+  useEffect(() => {
+    if (!selected && isEditing) {
+      setIsEditing(false);
+    }
+  }, [selected, isEditing]);
+
+  // Handle click outside to exit edit mode
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (nodeRef.current && !nodeRef.current.contains(e.target as Node)) {
+        setIsEditing(false);
+      }
+    };
+
+    if (isEditing) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isEditing]);
 
   // Handle detail item update
   const handleDetailUpdate = (index: number, value: string) => {
@@ -328,13 +355,18 @@ export default function CustomNode({
         );
       default: // note type
         return (
-          <div
-            ref={contentAreaRef}
-            className="relative cursor-text"
-            onPaste={handlePaste}
-          >
+          <div ref={contentAreaRef} className="relative" onPaste={handlePaste}>
             {/* TipTap Editor */}
-            <EditorContent editor={editor} className="cursor-text" />
+            <EditorContent
+              editor={editor}
+              className={isEditing ? "cursor-text prose-sm" : "cursor-pointer"}
+              onClick={(e) => {
+                if (selected && !isEditing) {
+                  e.stopPropagation();
+                  setIsEditing(true);
+                }
+              }}
+            />
 
             <input
               ref={fileInputRef}
@@ -351,28 +383,23 @@ export default function CustomNode({
   return (
     <div
       ref={nodeRef}
-      className={`bg-white border border-gray-200 ${
-        isActive
+      className={`bg-white ${
+        isEditing
           ? "shadow-md ring-1 ring-indigo-200"
           : selected
           ? "shadow-md"
           : "shadow-sm"
       } ${data.type === "image" ? "w-64" : "w-72"} text-xs relative`}
-      onClick={() => !isActive && setIsActive(true)}
-      onBlur={(e) => {
-        // Only deactivate if clicking outside the card
-        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-          setIsActive(false);
-          setShowDeleteButton(false);
-        }
-      }}
-      onMouseEnter={() => setShowDeleteButton(true)}
-      onMouseLeave={() => !isActive && setShowDeleteButton(false)}
+      onClick={handleCardClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}
+      data-editing={isEditing ? "true" : "false"}
+      style={{
+        cursor: isEditing ? "text" : "pointer",
+      }}
     >
-      {/* Delete Button - Inside Card */}
-      {showDeleteButton && (
+      {/* Delete Button - Only visible when selected but not editing */}
+      {selected && !isEditing && (
         <button
           className="absolute top-2 right-2 text-gray-400 hover:text-red-500 transition-colors p-1 border border-transparent hover:border-red-500 rounded"
           onClick={(e) => {
@@ -387,8 +414,8 @@ export default function CustomNode({
         </button>
       )}
 
-      {/* Connection Handles - only visible on hover or when selected and not active */}
-      {selected && !isActive && (
+      {/* Connection Handles - only visible when selected and not editing */}
+      {selected && !isEditing && (
         <>
           <Handle
             type="source"

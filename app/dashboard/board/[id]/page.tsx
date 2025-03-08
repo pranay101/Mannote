@@ -18,6 +18,7 @@ import ReactFlow, {
   Panel,
   useReactFlow,
   ReactFlowProvider,
+  NodeChange,
 } from "reactflow";
 import "reactflow/dist/style.css";
 
@@ -151,6 +152,33 @@ function Flow({ boardId }: { boardId: string }) {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
   const { project } = useReactFlow();
+
+  // Custom node change handler to prevent dragging active nodes
+  const handleNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      // Filter out position changes for nodes in editing mode
+      const filteredChanges = changes.filter((change) => {
+        if (change.type === "position") {
+          // Find the node element
+          const nodeElement = document.querySelector(
+            `[data-id="${change.id}"]`
+          );
+          // Check if the node is in editing mode
+          if (
+            nodeElement &&
+            nodeElement.querySelector('[data-editing="true"]')
+          ) {
+            return false; // Skip this change
+          }
+        }
+        return true;
+      });
+
+      // Apply the filtered changes
+      onNodesChange(filteredChanges);
+    },
+    [onNodesChange]
+  );
 
   // Get board title
   const boardTitle = `Board ${boardId}`;
@@ -322,7 +350,7 @@ function Flow({ boardId }: { boardId: string }) {
           <ReactFlow
             nodes={nodes}
             edges={edges}
-            onNodesChange={onNodesChange}
+            onNodesChange={handleNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             nodeTypes={nodeTypes}
@@ -331,6 +359,9 @@ function Flow({ boardId }: { boardId: string }) {
             minZoom={0.1}
             maxZoom={4}
             defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+            selectNodesOnDrag={false}
+            panOnDrag={[1, 2]} // Only pan when middle or right mouse button is used
+            className="text-selectable-flow"
           >
             <Controls />
             <MiniMap />
