@@ -2,21 +2,16 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Handle, Position, NodeProps } from "reactflow";
-import { useEditor, EditorContent, BubbleMenu } from "@tiptap/react";
+import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import {
-  MoreHorizontalIcon,
   ImageIcon,
   LinkIcon,
   CheckIcon,
   PlusIcon,
   XIcon,
   TrashIcon,
-  BoldIcon,
-  ItalicIcon,
-  ListIcon,
-  Heading1Icon,
 } from "lucide-react";
 
 interface CustomNodeData {
@@ -41,21 +36,30 @@ export default function CustomNode({
   data,
   selected,
 }: NodeProps<CustomNodeData>) {
-  const [editingTitle, setEditingTitle] = useState(false);
-  const [editableContent, setEditableContent] = useState(data.content);
+  const [isActive, setIsActive] = useState(false);
   const [editableDetails, setEditableDetails] = useState<string[]>(
     data.details
   );
-  const [showMenu, setShowMenu] = useState(false);
+  const [showDeleteButton, setShowDeleteButton] = useState(false);
   const [newItem, setNewItem] = useState("");
-  const contentRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const contentAreaRef = useRef<HTMLDivElement>(null);
+  const nodeRef = useRef<HTMLDivElement>(null);
 
   // Initialize TipTap editor
   const editor = useEditor({
-    extensions: [StarterKit, Image],
-    content: data.html || "<p>Click to add content...</p>",
+    extensions: [
+      StarterKit,
+      Image.configure({
+        inline: true,
+        allowBase64: true,
+      }),
+    ],
+    content:
+      data.html ||
+      (data.content
+        ? `<p>${data.content}</p>`
+        : "<p>Click to add content...</p>"),
     onUpdate: ({ editor }) => {
       if (data.onUpdate) {
         data.onUpdate(id, { html: editor.getHTML() });
@@ -66,23 +70,22 @@ export default function CustomNode({
         class:
           "prose prose-xs focus:outline-none min-h-[100px] max-w-none text-gray-600 text-xs",
       },
+      handlePaste: (view, event) => {
+        // Let our custom paste handler deal with images
+        if (event.clipboardData && event.clipboardData.files.length > 0) {
+          return true; // Return true to let our custom handler take over
+        }
+        return false; // Let TipTap handle other paste events
+      },
     },
   });
 
-  // Focus on content input when editing starts
+  // Focus editor when card becomes active
   useEffect(() => {
-    if (editingTitle && contentRef.current) {
-      contentRef.current.focus();
+    if (isActive && editor) {
+      editor.commands.focus();
     }
-  }, [editingTitle]);
-
-  // Handle content update
-  const handleContentUpdate = () => {
-    if (data.onUpdate) {
-      data.onUpdate(id, { content: editableContent });
-    }
-    setEditingTitle(false);
-  };
+  }, [isActive, editor]);
 
   // Handle detail item update
   const handleDetailUpdate = (index: number, value: string) => {
@@ -91,6 +94,43 @@ export default function CustomNode({
     setEditableDetails(newDetails);
     if (data.onUpdate) {
       data.onUpdate(id, { details: newDetails });
+    }
+  };
+
+  // Handle paste for images
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const items = e.clipboardData.items;
+
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf("image") !== -1) {
+        const blob = items[i].getAsFile();
+        if (blob) {
+          if (data.type === "image") {
+            e.preventDefault();
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              const imageUrl = event.target?.result as string;
+              const newDetails = [imageUrl];
+              setEditableDetails(newDetails);
+              if (data.onUpdate) {
+                data.onUpdate(id, { details: newDetails });
+              }
+            };
+            reader.readAsDataURL(blob);
+            return;
+          } else if (data.type === "note" && editor) {
+            // For note cards, insert the image into the TipTap editor
+            e.preventDefault();
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              const imageUrl = event.target?.result as string;
+              editor.chain().focus().setImage({ src: imageUrl }).run();
+            };
+            reader.readAsDataURL(blob);
+            return;
+          }
+        }
+      }
     }
   };
 
@@ -121,6 +161,16 @@ export default function CustomNode({
     if (e.key === "Enter") {
       handleAddDetail();
     }
+    if (e.key === "Delete" || e.key === "Backspace") {
+      // Only delete the node if Ctrl/Cmd is pressed with Delete/Backspace
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (data.onDelete) {
+          data.onDelete(id);
+        }
+      }
+    }
   };
 
   // Handle image upload
@@ -149,38 +199,12 @@ export default function CustomNode({
     }
   };
 
-  // Handle paste for images
-  const handlePaste = (e: React.ClipboardEvent) => {
-    const items = e.clipboardData.items;
-
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].type.indexOf("image") !== -1) {
-        const blob = items[i].getAsFile();
-        if (blob && data.type === "image") {
-          e.preventDefault();
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            const imageUrl = event.target?.result as string;
-            const newDetails = [imageUrl];
-            setEditableDetails(newDetails);
-            if (data.onUpdate) {
-              data.onUpdate(id, { details: newDetails });
-            }
-          };
-          reader.readAsDataURL(blob);
-          return;
-        }
-        // For other card types, let TipTap handle the paste
-      }
-    }
-  };
-
   // Render different content based on card type
   const renderCardContent = () => {
     switch (data.type) {
       case "image":
         return (
-          <div className="bg-white h-40 rounded flex flex-col items-center justify-center">
+          <div className="bg-white h-40 flex flex-col items-center justify-center">
             {data.details[0] ? (
               <img
                 src={data.details[0]}
@@ -214,7 +238,7 @@ export default function CustomNode({
         );
       case "link":
         return (
-          <div className="bg-blue-50/50 p-3 rounded flex flex-col">
+          <div className="bg-blue-50/50 p-3 flex flex-col">
             {data.details[0] ? (
               <a
                 href={data.details[0]}
@@ -232,10 +256,12 @@ export default function CustomNode({
                   <LinkIcon className="h-4 w-4 text-blue-500 mr-2 flex-shrink-0" />
                   <input
                     type="text"
-                    value={editableContent}
-                    onChange={(e) => setEditableContent(e.target.value)}
-                    onBlur={handleContentUpdate}
-                    placeholder="Link title"
+                    value={data.content}
+                    onChange={(e) => {
+                      if (data.onUpdate) {
+                        data.onUpdate(id, { content: e.target.value });
+                      }
+                    }}
                     className="flex-1 text-xs text-gray-600 bg-transparent focus:outline-none"
                   />
                 </div>
@@ -302,68 +328,13 @@ export default function CustomNode({
         );
       default: // note type
         return (
-          <div ref={contentAreaRef} className="relative">
-            {editor && (
-              <BubbleMenu
-                editor={editor}
-                tippyOptions={{ duration: 100 }}
-                className="bg-white shadow-sm rounded flex items-center space-x-1 p-1"
-              >
-                <button
-                  onClick={() => editor.chain().focus().toggleBold().run()}
-                  className={`p-1 rounded ${
-                    editor.isActive("bold")
-                      ? "bg-gray-100"
-                      : "hover:bg-gray-100"
-                  }`}
-                >
-                  <BoldIcon className="h-3 w-3" />
-                </button>
-                <button
-                  onClick={() => editor.chain().focus().toggleItalic().run()}
-                  className={`p-1 rounded ${
-                    editor.isActive("italic")
-                      ? "bg-gray-100"
-                      : "hover:bg-gray-100"
-                  }`}
-                >
-                  <ItalicIcon className="h-3 w-3" />
-                </button>
-                <button
-                  onClick={() =>
-                    editor.chain().focus().toggleBulletList().run()
-                  }
-                  className={`p-1 rounded ${
-                    editor.isActive("bulletList")
-                      ? "bg-gray-100"
-                      : "hover:bg-gray-100"
-                  }`}
-                >
-                  <ListIcon className="h-3 w-3" />
-                </button>
-                <button
-                  onClick={() =>
-                    editor.chain().focus().toggleHeading({ level: 3 }).run()
-                  }
-                  className={`p-1 rounded ${
-                    editor.isActive("heading", { level: 3 })
-                      ? "bg-gray-100"
-                      : "hover:bg-gray-100"
-                  }`}
-                >
-                  <Heading1Icon className="h-3 w-3" />
-                </button>
-                <button
-                  onClick={handleImageUpload}
-                  className="p-1 rounded hover:bg-gray-100"
-                >
-                  <ImageIcon className="h-3 w-3" />
-                </button>
-              </BubbleMenu>
-            )}
-
+          <div
+            ref={contentAreaRef}
+            className="relative cursor-text"
+            onPaste={handlePaste}
+          >
             {/* TipTap Editor */}
-            <EditorContent editor={editor} />
+            <EditorContent editor={editor} className="cursor-text" />
 
             <input
               ref={fileInputRef}
@@ -379,12 +350,45 @@ export default function CustomNode({
 
   return (
     <div
-      className={`bg-white rounded-md shadow-sm ${
-        selected ? "shadow-md" : ""
-      } ${data.type === "image" ? "w-64" : "w-72"} text-xs`}
+      ref={nodeRef}
+      className={`bg-white border border-gray-200 ${
+        isActive
+          ? "shadow-md ring-1 ring-indigo-200"
+          : selected
+          ? "shadow-md"
+          : "shadow-sm"
+      } ${data.type === "image" ? "w-64" : "w-72"} text-xs relative`}
+      onClick={() => !isActive && setIsActive(true)}
+      onBlur={(e) => {
+        // Only deactivate if clicking outside the card
+        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+          setIsActive(false);
+          setShowDeleteButton(false);
+        }
+      }}
+      onMouseEnter={() => setShowDeleteButton(true)}
+      onMouseLeave={() => !isActive && setShowDeleteButton(false)}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
     >
-      {/* Connection Handles - only visible on hover or when selected */}
-      {selected && (
+      {/* Delete Button - Inside Card */}
+      {showDeleteButton && (
+        <button
+          className="absolute top-2 right-2 text-gray-400 hover:text-red-500 transition-colors p-1 border border-transparent hover:border-red-500 rounded"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (data.onDelete) {
+              data.onDelete(id);
+            }
+          }}
+          title="Delete card (Ctrl+Delete)"
+        >
+          <TrashIcon className="h-3 w-3" />
+        </button>
+      )}
+
+      {/* Connection Handles - only visible on hover or when selected and not active */}
+      {selected && !isActive && (
         <>
           <Handle
             type="source"
@@ -413,59 +417,8 @@ export default function CustomNode({
         </>
       )}
 
-      {/* Card Header */}
-      <div className="p-3 border-b border-gray-100 flex justify-between items-center">
-        {editingTitle ? (
-          <input
-            ref={contentRef}
-            type="text"
-            value={editableContent}
-            onChange={(e) => setEditableContent(e.target.value)}
-            onBlur={handleContentUpdate}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleContentUpdate();
-              }
-            }}
-            className="flex-1 text-xs font-medium text-gray-900 bg-transparent outline-none border-none focus:outline-none focus:ring-0"
-            onClick={(e) => e.stopPropagation()}
-          />
-        ) : (
-          <div
-            className="text-xs font-medium text-gray-900 cursor-text"
-            onClick={() => setEditingTitle(true)}
-          >
-            {editableContent}
-          </div>
-        )}
-        <div className="relative">
-          <button
-            className="p-1 rounded-full text-gray-400 hover:text-gray-500 active:border-none active:outline-none"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowMenu(!showMenu);
-            }}
-          >
-            <MoreHorizontalIcon className="h-3 w-3" />
-          </button>
-
-          {/* Card Menu */}
-          {showMenu && (
-            <div className="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg z-50 py-1">
-              <button
-                className="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-gray-100 flex items-center"
-                onClick={() => data.onDelete && data.onDelete(id)}
-              >
-                <TrashIcon className="h-3 w-3 mr-2" />
-                Delete Card
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* Card Content */}
-      <div className="p-3 group text-xs">{renderCardContent()}</div>
+      <div className="p-3 group">{renderCardContent()}</div>
     </div>
   );
 }

@@ -279,37 +279,37 @@ function Flow({ boardId }: { boardId: string }) {
       <div className="ml-16 h-screen">
         {/* Board Header */}
         <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-          <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center space-x-4">
+          <div className="max-w-full mx-auto px-4">
+            <div className="flex justify-between items-center h-12">
+              <div className="flex items-center space-x-3">
                 <Link
                   href="/dashboard"
                   className="text-gray-500 hover:text-gray-700"
                 >
-                  <ArrowLeftIcon className="h-5 w-5" />
+                  <ArrowLeftIcon className="h-4 w-4" />
                 </Link>
-                <h1 className="text-xl font-semibold text-gray-900">
+                <h1 className="text-sm font-semibold text-gray-900">
                   {boardTitle}
                 </h1>
               </div>
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <SearchIcon className="h-4 w-4 text-gray-400" />
+                  <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                    <SearchIcon className="h-3 w-3 text-gray-400" />
                   </div>
                   <input
                     type="text"
-                    placeholder="Search in board..."
-                    className="block w-full pl-10 pr-3 py-1.5 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    placeholder="Search..."
+                    className="block w-32 pl-7 pr-2 py-1 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs"
                   />
                 </div>
-                <button className="p-1.5 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100">
-                  <Share2Icon className="h-5 w-5" />
+                <button className="p-1 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100">
+                  <Share2Icon className="h-4 w-4" />
                 </button>
-                <button className="p-1.5 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100">
-                  <SettingsIcon className="h-5 w-5" />
+                <button className="p-1 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100">
+                  <SettingsIcon className="h-4 w-4" />
                 </button>
-                <div className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white">
+                <div className="h-6 w-6 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs">
                   U
                 </div>
               </div>
@@ -318,7 +318,7 @@ function Flow({ boardId }: { boardId: string }) {
         </header>
 
         {/* React Flow Canvas */}
-        <div ref={reactFlowWrapper} className="h-[calc(100vh-64px)]">
+        <div ref={reactFlowWrapper} className="h-[calc(100vh-48px)]">
           <ReactFlow
             nodes={nodes}
             edges={edges}
