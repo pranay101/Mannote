@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useRef } from "react";
+import { Handle, Position, NodeProps } from "reactflow";
 import {
   MoreHorizontalIcon,
   ImageIcon,
   LinkIcon,
-  ListIcon,
   CheckIcon,
   PlusIcon,
   XIcon,
@@ -14,59 +13,35 @@ import {
   EditIcon,
 } from "lucide-react";
 
-interface BoardCardProps {
-  id: number;
+interface CustomNodeData {
   type: string;
   content: string;
   details: string[];
-  position: { x: number; y: number };
-  isActive: boolean;
-  isDragging: boolean;
-  onDragStart: (e: React.MouseEvent, id: number) => void;
   onUpdate?: (
-    id: number,
+    id: string,
     updates: Partial<{ content: string; details: string[]; type: string }>
   ) => void;
-  onDelete?: (id: number) => void;
-  connectionStartHandler?: (id: number) => void;
-  connectionEndHandler?: (id: number) => void;
-  isConnectionMode?: boolean;
+  onDelete?: (id: string) => void;
 }
 
-export default function BoardCard({
+export default function CustomNode({
   id,
-  type,
-  content,
-  details,
-  position,
-  isActive,
-  isDragging,
-  onDragStart,
-  onUpdate,
-  onDelete,
-  connectionStartHandler,
-  connectionEndHandler,
-  isConnectionMode = false,
-}: BoardCardProps) {
+  data,
+  selected,
+}: NodeProps<CustomNodeData>) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editableContent, setEditableContent] = useState(content);
-  const [editableDetails, setEditableDetails] = useState<string[]>(details);
+  const [editableContent, setEditableContent] = useState(data.content);
+  const [editableDetails, setEditableDetails] = useState<string[]>(
+    data.details
+  );
   const [showMenu, setShowMenu] = useState(false);
   const [newItem, setNewItem] = useState("");
   const contentRef = useRef<HTMLInputElement>(null);
-  const newItemRef = useRef<HTMLInputElement>(null);
-
-  // Focus on content input when editing starts
-  useEffect(() => {
-    if (isEditing && contentRef.current) {
-      contentRef.current.focus();
-    }
-  }, [isEditing]);
 
   // Handle content update
   const handleContentUpdate = () => {
-    if (onUpdate) {
-      onUpdate(id, { content: editableContent });
+    if (data.onUpdate) {
+      data.onUpdate(id, { content: editableContent });
     }
   };
 
@@ -75,8 +50,8 @@ export default function BoardCard({
     const newDetails = [...editableDetails];
     newDetails[index] = value;
     setEditableDetails(newDetails);
-    if (onUpdate) {
-      onUpdate(id, { details: newDetails });
+    if (data.onUpdate) {
+      data.onUpdate(id, { details: newDetails });
     }
   };
 
@@ -86,12 +61,8 @@ export default function BoardCard({
       const newDetails = [...editableDetails, newItem];
       setEditableDetails(newDetails);
       setNewItem("");
-      if (onUpdate) {
-        onUpdate(id, { details: newDetails });
-      }
-      // Focus on the new item input after adding
-      if (newItemRef.current) {
-        newItemRef.current.focus();
+      if (data.onUpdate) {
+        data.onUpdate(id, { details: newDetails });
       }
     }
   };
@@ -101,8 +72,8 @@ export default function BoardCard({
     const newDetails = [...editableDetails];
     newDetails.splice(index, 1);
     setEditableDetails(newDetails);
-    if (onUpdate) {
-      onUpdate(id, { details: newDetails });
+    if (data.onUpdate) {
+      data.onUpdate(id, { details: newDetails });
     }
   };
 
@@ -115,14 +86,14 @@ export default function BoardCard({
 
   // Render different content based on card type
   const renderCardContent = () => {
-    switch (type) {
+    switch (data.type) {
       case "image":
         return (
           <div className="bg-gray-200 h-40 rounded flex flex-col items-center justify-center">
-            {details[0] ? (
+            {data.details[0] ? (
               <img
-                src={details[0]}
-                alt={content}
+                src={data.details[0]}
+                alt={data.content}
                 className="h-full w-full object-contain"
               />
             ) : (
@@ -142,8 +113,8 @@ export default function BoardCard({
                           const newDetails = [newItem];
                           setEditableDetails(newDetails);
                           setNewItem("");
-                          if (onUpdate) {
-                            onUpdate(id, { details: newDetails });
+                          if (data.onUpdate) {
+                            data.onUpdate(id, { details: newDetails });
                           }
                         }
                       }}
@@ -164,8 +135,8 @@ export default function BoardCard({
                               const imageUrl = event.target?.result as string;
                               const newDetails = [imageUrl];
                               setEditableDetails(newDetails);
-                              if (onUpdate) {
-                                onUpdate(id, { details: newDetails });
+                              if (data.onUpdate) {
+                                data.onUpdate(id, { details: newDetails });
                               }
                             };
                             reader.readAsDataURL(file);
@@ -182,15 +153,15 @@ export default function BoardCard({
       case "link":
         return (
           <div className="bg-blue-50 p-3 rounded flex flex-col">
-            {details[0] && !isEditing ? (
+            {data.details[0] && !isEditing ? (
               <a
-                href={details[0]}
+                href={data.details[0]}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 underline flex items-center"
               >
                 <LinkIcon className="h-5 w-5 text-blue-500 mr-2 flex-shrink-0" />
-                <span>{content}</span>
+                <span>{data.content}</span>
               </a>
             ) : (
               <div className="space-y-3">
@@ -207,12 +178,12 @@ export default function BoardCard({
                 </div>
                 <input
                   type="url"
-                  value={details[0] || ""}
+                  value={editableDetails[0] || ""}
                   onChange={(e) => {
                     const newDetails = [e.target.value];
                     setEditableDetails(newDetails);
-                    if (onUpdate) {
-                      onUpdate(id, { details: newDetails });
+                    if (data.onUpdate) {
+                      data.onUpdate(id, { details: newDetails });
                     }
                   }}
                   placeholder="https://example.com"
@@ -259,7 +230,6 @@ export default function BoardCard({
                   <PlusIcon className="h-3 w-3 text-gray-500" />
                 </button>
                 <input
-                  ref={newItemRef}
                   type="text"
                   value={newItem}
                   onChange={(e) => setNewItem(e.target.value)}
@@ -296,7 +266,6 @@ export default function BoardCard({
                 ))}
                 <div className="flex items-center mt-2">
                   <input
-                    ref={newItemRef}
                     type="text"
                     value={newItem}
                     onChange={(e) => setNewItem(e.target.value)}
@@ -325,46 +294,39 @@ export default function BoardCard({
   };
 
   return (
-    <motion.div
-      className={`absolute bg-white rounded-md shadow-md ${
-        isActive ? "z-50 shadow-lg" : "z-10"
-      } ${type === "image" ? "w-64 h-64" : "w-72"}`}
-      style={{
-        left: position.x,
-        top: position.y,
-        cursor: isDragging && isActive ? "grabbing" : "grab",
-      }}
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.2 }}
+    <div
+      className={`bg-white rounded-md shadow-md ${
+        selected ? "ring-2 ring-indigo-500" : ""
+      } ${data.type === "image" ? "w-64" : "w-72"}`}
     >
-      {/* Connection points */}
-      {!isConnectionMode && (
-        <>
-          <div
-            className="absolute w-3 h-3 bg-indigo-500 rounded-full top-1/2 -left-1.5 transform -translate-y-1/2 cursor-pointer hover:scale-125 transition-transform"
-            onClick={() => connectionStartHandler && connectionStartHandler(id)}
-          />
-          <div
-            className="absolute w-3 h-3 bg-indigo-500 rounded-full top-1/2 -right-1.5 transform -translate-y-1/2 cursor-pointer hover:scale-125 transition-transform"
-            onClick={() => connectionEndHandler && connectionEndHandler(id)}
-          />
-          <div
-            className="absolute w-3 h-3 bg-indigo-500 rounded-full left-1/2 -top-1.5 transform -translate-x-1/2 cursor-pointer hover:scale-125 transition-transform"
-            onClick={() => connectionStartHandler && connectionStartHandler(id)}
-          />
-          <div
-            className="absolute w-3 h-3 bg-indigo-500 rounded-full left-1/2 -bottom-1.5 transform -translate-x-1/2 cursor-pointer hover:scale-125 transition-transform"
-            onClick={() => connectionEndHandler && connectionEndHandler(id)}
-          />
-        </>
-      )}
+      {/* Connection Handles */}
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="right"
+        className="w-3 h-3 bg-indigo-500"
+      />
+      <Handle
+        type="source"
+        position={Position.Left}
+        id="left"
+        className="w-3 h-3 bg-indigo-500"
+      />
+      <Handle
+        type="source"
+        position={Position.Top}
+        id="top"
+        className="w-3 h-3 bg-indigo-500"
+      />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        id="bottom"
+        className="w-3 h-3 bg-indigo-500"
+      />
 
       {/* Card Header */}
-      <div
-        className="p-3 border-b border-gray-200 flex justify-between items-center cursor-grab active:cursor-grabbing"
-        onMouseDown={(e) => !isEditing && onDragStart(e, id)}
-      >
+      <div className="p-3 border-b border-gray-200 flex justify-between items-center">
         {isEditing ? (
           <input
             ref={contentRef}
@@ -406,7 +368,7 @@ export default function BoardCard({
               </button>
               <button
                 className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center"
-                onClick={() => onDelete && onDelete(id)}
+                onClick={() => data.onDelete && data.onDelete(id)}
               >
                 <TrashIcon className="h-4 w-4 mr-2" />
                 Delete Card
@@ -418,6 +380,6 @@ export default function BoardCard({
 
       {/* Card Content */}
       <div className="p-3">{renderCardContent()}</div>
-    </motion.div>
+    </div>
   );
 }
