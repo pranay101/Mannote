@@ -56,6 +56,12 @@ export default function Home() {
           >
             About
           </Link>
+          <Link
+            href="/dashboard"
+            className="text-sm hover:text-indigo-600 transition-colors"
+          >
+            Dashboard
+          </Link>
         </div>
         <div className="flex items-center gap-4">
           <Link
@@ -65,7 +71,7 @@ export default function Home() {
             Log in
           </Link>
           <Link
-            href="/signup"
+            href="/dashboard"
             className="text-sm bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md transition-colors"
           >
             Sign up free
@@ -580,7 +586,7 @@ export default function Home() {
             their thoughts and bring their projects to life.
           </p>
           <Link
-            href="/signup"
+            href="/dashboard"
             className="bg-white text-indigo-600 hover:bg-gray-100 px-8 py-3 rounded-md text-lg font-medium transition-colors inline-block"
           >
             Get started for free
