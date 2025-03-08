@@ -85,6 +85,13 @@ html {
   outline-offset: 2px;
 }
 
+/* Remove outline for inputs in cards */
+.bg-white input:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: transparent;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
@@ -308,6 +315,7 @@ html {
 .ProseMirror p {
   margin-bottom: 0.75rem;
   line-height: 1.5;
+  font-size: 0.75rem;
 }
 
 .ProseMirror h1,
@@ -320,15 +328,15 @@ html {
 }
 
 .ProseMirror h1 {
-  font-size: 1.5rem;
-}
-
-.ProseMirror h2 {
   font-size: 1.25rem;
 }
 
+.ProseMirror h2 {
+  font-size: 1rem;
+}
+
 .ProseMirror h3 {
-  font-size: 1.125rem;
+  font-size: 0.875rem;
 }
 
 .ProseMirror ul,
@@ -347,6 +355,7 @@ html {
 
 .ProseMirror li {
   margin-bottom: 0.25rem;
+  font-size: 0.75rem;
 }
 
 .ProseMirror a {

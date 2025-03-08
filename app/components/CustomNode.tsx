@@ -64,7 +64,7 @@ export default function CustomNode({
     editorProps: {
       attributes: {
         class:
-          "prose prose-sm focus:outline-none min-h-[100px] max-w-none text-gray-600",
+          "prose prose-xs focus:outline-none min-h-[100px] max-w-none text-gray-600 text-xs",
       },
     },
   });
@@ -197,7 +197,7 @@ export default function CustomNode({
                   onClick={handleImageUpload}
                 >
                   <ImageIcon className="h-10 w-10 text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-500">
+                  <p className="text-xs text-gray-500">
                     Click to upload or paste an image
                   </p>
                 </div>
@@ -220,23 +220,23 @@ export default function CustomNode({
                 href={data.details[0]}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 underline flex items-center"
+                className="text-blue-600 underline flex items-center text-xs"
                 onClick={(e) => e.stopPropagation()}
               >
-                <LinkIcon className="h-5 w-5 text-blue-500 mr-2 flex-shrink-0" />
+                <LinkIcon className="h-4 w-4 text-blue-500 mr-2 flex-shrink-0" />
                 <span>{data.content}</span>
               </a>
             ) : (
               <div className="space-y-3">
                 <div className="flex items-center">
-                  <LinkIcon className="h-5 w-5 text-blue-500 mr-2 flex-shrink-0" />
+                  <LinkIcon className="h-4 w-4 text-blue-500 mr-2 flex-shrink-0" />
                   <input
                     type="text"
                     value={editableContent}
                     onChange={(e) => setEditableContent(e.target.value)}
                     onBlur={handleContentUpdate}
                     placeholder="Link title"
-                    className="flex-1 text-sm text-gray-600 bg-transparent focus:outline-none"
+                    className="flex-1 text-xs text-gray-600 bg-transparent focus:outline-none"
                   />
                 </div>
                 <input
@@ -250,7 +250,7 @@ export default function CustomNode({
                     }
                   }}
                   placeholder="https://example.com"
-                  className="w-full text-sm text-blue-600 bg-transparent focus:outline-none"
+                  className="w-full text-xs text-blue-600 bg-transparent focus:outline-none"
                 />
               </div>
             )}
@@ -262,10 +262,10 @@ export default function CustomNode({
             {editableDetails.map((detail, index) => (
               <div key={index} className="flex items-center group">
                 <button
-                  className="w-5 h-5 rounded-sm border border-gray-300 flex items-center justify-center mr-2 flex-shrink-0"
+                  className="w-4 h-4 rounded-sm border border-gray-300 flex items-center justify-center mr-2 flex-shrink-0"
                   onClick={() => handleRemoveDetail(index)}
                 >
-                  <CheckIcon className="h-3 w-3 text-gray-500" />
+                  <CheckIcon className="h-2 w-2 text-gray-500" />
                 </button>
                 <div
                   contentEditable
@@ -273,7 +273,7 @@ export default function CustomNode({
                   onBlur={(e) =>
                     handleDetailUpdate(index, e.currentTarget.textContent || "")
                   }
-                  className="flex-1 text-sm text-gray-600 focus:outline-none"
+                  className="flex-1 text-xs text-gray-600 focus:outline-none"
                 >
                   {detail}
                 </div>
@@ -286,8 +286,8 @@ export default function CustomNode({
               </div>
             ))}
             <div className="flex items-center mt-2">
-              <button className="w-5 h-5 rounded-sm border border-gray-300 flex items-center justify-center mr-2 flex-shrink-0">
-                <PlusIcon className="h-3 w-3 text-gray-500" />
+              <button className="w-4 h-4 rounded-sm border border-gray-300 flex items-center justify-center mr-2 flex-shrink-0">
+                <PlusIcon className="h-2 w-2 text-gray-500" />
               </button>
               <input
                 type="text"
@@ -295,7 +295,7 @@ export default function CustomNode({
                 onChange={(e) => setNewItem(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Add new item..."
-                className="flex-1 text-sm text-gray-600 bg-transparent focus:outline-none"
+                className="flex-1 text-xs text-gray-600 bg-transparent focus:outline-none"
               />
             </div>
           </div>
@@ -317,7 +317,7 @@ export default function CustomNode({
                       : "hover:bg-gray-100"
                   }`}
                 >
-                  <BoldIcon className="h-4 w-4" />
+                  <BoldIcon className="h-3 w-3" />
                 </button>
                 <button
                   onClick={() => editor.chain().focus().toggleItalic().run()}
@@ -327,7 +327,7 @@ export default function CustomNode({
                       : "hover:bg-gray-100"
                   }`}
                 >
-                  <ItalicIcon className="h-4 w-4" />
+                  <ItalicIcon className="h-3 w-3" />
                 </button>
                 <button
                   onClick={() =>
@@ -339,7 +339,7 @@ export default function CustomNode({
                       : "hover:bg-gray-100"
                   }`}
                 >
-                  <ListIcon className="h-4 w-4" />
+                  <ListIcon className="h-3 w-3" />
                 </button>
                 <button
                   onClick={() =>
@@ -351,13 +351,13 @@ export default function CustomNode({
                       : "hover:bg-gray-100"
                   }`}
                 >
-                  <Heading1Icon className="h-4 w-4" />
+                  <Heading1Icon className="h-3 w-3" />
                 </button>
                 <button
                   onClick={handleImageUpload}
                   className="p-1 rounded hover:bg-gray-100"
                 >
-                  <ImageIcon className="h-4 w-4" />
+                  <ImageIcon className="h-3 w-3" />
                 </button>
               </BubbleMenu>
             )}
@@ -381,7 +381,7 @@ export default function CustomNode({
     <div
       className={`bg-white rounded-md shadow-sm ${
         selected ? "shadow-md" : ""
-      } ${data.type === "image" ? "w-64" : "w-72"}`}
+      } ${data.type === "image" ? "w-64" : "w-72"} text-xs`}
     >
       {/* Connection Handles - only visible on hover or when selected */}
       {selected && (
@@ -390,25 +390,25 @@ export default function CustomNode({
             type="source"
             position={Position.Right}
             id="right"
-            className="w-3 h-3 bg-indigo-500 opacity-70"
+            className="w-2 h-2 bg-indigo-500 opacity-0 hover:opacity-70 transition-opacity"
           />
           <Handle
             type="source"
             position={Position.Left}
             id="left"
-            className="w-3 h-3 bg-indigo-500 opacity-70"
+            className="w-2 h-2 bg-indigo-500 opacity-0 hover:opacity-70 transition-opacity"
           />
           <Handle
             type="source"
             position={Position.Top}
             id="top"
-            className="w-3 h-3 bg-indigo-500 opacity-70"
+            className="w-2 h-2 bg-indigo-500 opacity-0 hover:opacity-70 transition-opacity"
           />
           <Handle
             type="source"
             position={Position.Bottom}
             id="bottom"
-            className="w-3 h-3 bg-indigo-500 opacity-70"
+            className="w-2 h-2 bg-indigo-500 opacity-0 hover:opacity-70 transition-opacity"
           />
         </>
       )}
@@ -427,36 +427,36 @@ export default function CustomNode({
                 handleContentUpdate();
               }
             }}
-            className="flex-1 text-sm font-medium text-gray-900 bg-transparent focus:outline-none"
+            className="flex-1 text-xs font-medium text-gray-900 bg-transparent outline-none border-none focus:outline-none focus:ring-0"
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
-          <h3
-            className="text-sm font-medium text-gray-900 cursor-text"
+          <div
+            className="text-xs font-medium text-gray-900 cursor-text"
             onClick={() => setEditingTitle(true)}
           >
             {editableContent}
-          </h3>
+          </div>
         )}
         <div className="relative">
           <button
-            className="p-1 rounded-full text-gray-400 hover:text-gray-500 opacity-0 group-hover:opacity-100 hover:opacity-100"
+            className="p-1 rounded-full text-gray-400 hover:text-gray-500 active:border-none active:outline-none"
             onClick={(e) => {
               e.stopPropagation();
               setShowMenu(!showMenu);
             }}
           >
-            <MoreHorizontalIcon className="h-4 w-4" />
+            <MoreHorizontalIcon className="h-3 w-3" />
           </button>
 
           {/* Card Menu */}
           {showMenu && (
-            <div className="absolute right-0 mt-1 w-36 bg-white rounded-md shadow-lg z-50 py-1">
+            <div className="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg z-50 py-1">
               <button
-                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center"
+                className="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-gray-100 flex items-center"
                 onClick={() => data.onDelete && data.onDelete(id)}
               >
-                <TrashIcon className="h-4 w-4 mr-2" />
+                <TrashIcon className="h-3 w-3 mr-2" />
                 Delete Card
               </button>
             </div>
@@ -465,7 +465,7 @@ export default function CustomNode({
       </div>
 
       {/* Card Content */}
-      <div className="p-3 group">{renderCardContent()}</div>
+      <div className="p-3 group text-xs">{renderCardContent()}</div>
     </div>
   );
 }
