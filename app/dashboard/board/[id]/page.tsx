@@ -50,6 +50,7 @@ const initialNodes: Node[] = [
         "link it to the backend and make sure to provide high security and safety",
         "admin dashboard allows functionality like adding mentor accounts and populating students into the database",
       ],
+      html: "<p>Create a form for admin login and attach it to the main page.</p><p>Link it to the backend and make sure to provide high security and safety.</p><p>Admin dashboard allows functionality like adding mentor accounts and populating students into the database.</p>",
     },
   },
   {
@@ -231,6 +232,11 @@ function Flow({ boardId }: { boardId: string }) {
         y: window.innerHeight / 2,
       });
 
+      let initialHtml = "";
+      if (type === "note") {
+        initialHtml = "<p>Click to add content...</p>";
+      }
+
       const newNode: Node = {
         id: newId,
         type: "custom",
@@ -248,6 +254,7 @@ function Flow({ boardId }: { boardId: string }) {
               ? "New Link"
               : "New Item",
           details: [],
+          html: initialHtml,
           onUpdate: handleNodeUpdate,
           onDelete: handleNodeDelete,
         },

@@ -206,3 +206,237 @@ html {
   background-image: radial-gradient(var(--gray-300) 1px, transparent 1px);
   background-size: 20px 20px;
 }
+
+/* Rich text content styles */
+.rich-text-content {
+  line-height: 1.5;
+}
+
+.rich-text-content p {
+  margin-bottom: 0.75rem;
+}
+
+.rich-text-content h1, 
+.rich-text-content h2, 
+.rich-text-content h3 {
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.rich-text-content h1 {
+  font-size: 1.5rem;
+}
+
+.rich-text-content h2 {
+  font-size: 1.25rem;
+}
+
+.rich-text-content h3 {
+  font-size: 1.125rem;
+}
+
+.rich-text-content ul, 
+.rich-text-content ol {
+  margin-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.rich-text-content ul {
+  list-style-type: disc;
+}
+
+.rich-text-content ol {
+  list-style-type: decimal;
+}
+
+.rich-text-content li {
+  margin-bottom: 0.25rem;
+}
+
+.rich-text-content a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.rich-text-content img {
+  max-width: 100%;
+  height: auto;
+  margin: 0.5rem 0;
+  border-radius: 0.25rem;
+}
+
+.rich-text-content strong {
+  font-weight: 600;
+}
+
+.rich-text-content em {
+  font-style: italic;
+}
+
+.rich-text-content blockquote {
+  border-left: 3px solid var(--gray-300);
+  padding-left: 1rem;
+  margin-left: 0;
+  margin-right: 0;
+  font-style: italic;
+  color: var(--gray-600);
+}
+
+.rich-text-content pre {
+  background-color: var(--gray-100);
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+  overflow-x: auto;
+  margin: 0.75rem 0;
+}
+
+.rich-text-content code {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  background-color: var(--gray-100);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+}
+
+/* TipTap Editor Styles */
+.ProseMirror {
+  outline: none;
+  min-height: 100px;
+}
+
+.ProseMirror p {
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3 {
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.ProseMirror h1 {
+  font-size: 1.5rem;
+}
+
+.ProseMirror h2 {
+  font-size: 1.25rem;
+}
+
+.ProseMirror h3 {
+  font-size: 1.125rem;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.ProseMirror ul {
+  list-style-type: disc;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal;
+}
+
+.ProseMirror li {
+  margin-bottom: 0.25rem;
+}
+
+.ProseMirror a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  margin: 0.5rem 0;
+  border-radius: 0.25rem;
+}
+
+.ProseMirror strong {
+  font-weight: 600;
+}
+
+.ProseMirror em {
+  font-style: italic;
+}
+
+.ProseMirror blockquote {
+  border-left: 3px solid var(--gray-300);
+  padding-left: 1rem;
+  margin-left: 0;
+  margin-right: 0;
+  font-style: italic;
+  color: var(--gray-600);
+}
+
+.ProseMirror pre {
+  background-color: var(--gray-100);
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+  overflow-x: auto;
+  margin: 0.75rem 0;
+}
+
+.ProseMirror code {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  background-color: var(--gray-100);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--gray-400);
+  pointer-events: none;
+  height: 0;
+}
+
+/* Bubble menu styles */
+.tippy-box {
+  border-radius: 0.25rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Prose styles for TipTap */
+.prose {
+  max-width: none;
+}
+
+.prose img {
+  margin: 0;
+}
+
+.prose :where(ul):not(:where([class~="not-prose"] *)) {
+  list-style-type: disc;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
+}
+
+.prose :where(ol):not(:where([class~="not-prose"] *)) {
+  list-style-type: decimal;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
+}
+
+.prose :where(li):not(:where([class~="not-prose"] *)) {
+  margin-top: 0;
+  margin-bottom: 0.25rem;
+}
+
+.prose :where(p):not(:where([class~="not-prose"] *)) {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
