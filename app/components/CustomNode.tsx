@@ -5,14 +5,13 @@ import { Handle, Position, NodeProps } from "reactflow";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
-import {
-  ImageIcon,
-  LinkIcon,
-  CheckIcon,
-  PlusIcon,
-  XIcon,
-  TrashIcon,
-} from "lucide-react";
+import { TrashIcon } from "lucide-react";
+
+// Import card components
+import ImageCard from "./cards/ImageCard";
+import LinkCard from "./cards/LinkCard";
+import TodoCard from "./cards/TodoCard";
+import NoteCard from "./cards/NoteCard";
 
 interface CustomNodeData {
   type: string;
@@ -42,7 +41,6 @@ export default function CustomNode({
   );
   const [newItem, setNewItem] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const contentAreaRef = useRef<HTMLDivElement>(null);
   const nodeRef = useRef<HTMLDivElement>(null);
 
   // Initialize TipTap editor
@@ -231,151 +229,49 @@ export default function CustomNode({
     switch (data.type) {
       case "image":
         return (
-          <div className="bg-white h-40 flex flex-col items-center justify-center">
-            {data.details[0] ? (
-              <img
-                src={data.details[0]}
-                alt={data.content}
-                className="h-full w-full object-contain"
-              />
-            ) : (
-              <div
-                className="flex flex-col items-center w-full h-full"
-                onPaste={handlePaste}
-              >
-                <div
-                  className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors"
-                  onClick={handleImageUpload}
-                >
-                  <ImageIcon className="h-10 w-10 text-gray-400 mb-2" />
-                  <p className="text-xs text-gray-500">
-                    Click to upload or paste an image
-                  </p>
-                </div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-              </div>
-            )}
-          </div>
+          <ImageCard
+            content={data.content}
+            details={data.details}
+            id={id}
+            onUpdate={data.onUpdate}
+            handlePaste={handlePaste}
+            handleImageUpload={handleImageUpload}
+            handleFileChange={handleFileChange}
+          />
         );
       case "link":
         return (
-          <div className="bg-blue-50/50 p-3 flex flex-col">
-            {data.details[0] ? (
-              <a
-                href={data.details[0]}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 underline flex items-center text-xs"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <LinkIcon className="h-4 w-4 text-blue-500 mr-2 flex-shrink-0" />
-                <span>{data.content}</span>
-              </a>
-            ) : (
-              <div className="space-y-3">
-                <div className="flex items-center">
-                  <LinkIcon className="h-4 w-4 text-blue-500 mr-2 flex-shrink-0" />
-                  <input
-                    type="text"
-                    value={data.content}
-                    onChange={(e) => {
-                      if (data.onUpdate) {
-                        data.onUpdate(id, { content: e.target.value });
-                      }
-                    }}
-                    className="flex-1 text-xs text-gray-600 bg-transparent focus:outline-none"
-                  />
-                </div>
-                <input
-                  type="url"
-                  value={editableDetails[0] || ""}
-                  onChange={(e) => {
-                    const newDetails = [e.target.value];
-                    setEditableDetails(newDetails);
-                    if (data.onUpdate) {
-                      data.onUpdate(id, { details: newDetails });
-                    }
-                  }}
-                  placeholder="https://example.com"
-                  className="w-full text-xs text-blue-600 bg-transparent focus:outline-none"
-                />
-              </div>
-            )}
-          </div>
+          <LinkCard
+            content={data.content}
+            details={data.details}
+            id={id}
+            editableDetails={editableDetails}
+            setEditableDetails={setEditableDetails}
+            onUpdate={data.onUpdate}
+          />
         );
       case "todo":
         return (
-          <div className="space-y-2">
-            {editableDetails.map((detail, index) => (
-              <div key={index} className="flex items-center group">
-                <button
-                  className="w-4 h-4 rounded-sm border border-gray-300 flex items-center justify-center mr-2 flex-shrink-0"
-                  onClick={() => handleRemoveDetail(index)}
-                >
-                  <CheckIcon className="h-2 w-2 text-gray-500" />
-                </button>
-                <div
-                  contentEditable
-                  suppressContentEditableWarning
-                  onBlur={(e) =>
-                    handleDetailUpdate(index, e.currentTarget.textContent || "")
-                  }
-                  className="flex-1 text-xs text-gray-600 focus:outline-none"
-                >
-                  {detail}
-                </div>
-                <button
-                  className="ml-2 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => handleRemoveDetail(index)}
-                >
-                  <XIcon className="h-3 w-3" />
-                </button>
-              </div>
-            ))}
-            <div className="flex items-center mt-2">
-              <button className="w-4 h-4 rounded-sm border border-gray-300 flex items-center justify-center mr-2 flex-shrink-0">
-                <PlusIcon className="h-2 w-2 text-gray-500" />
-              </button>
-              <input
-                type="text"
-                value={newItem}
-                onChange={(e) => setNewItem(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Add new item..."
-                className="flex-1 text-xs text-gray-600 bg-transparent focus:outline-none"
-              />
-            </div>
-          </div>
+          <TodoCard
+            editableDetails={editableDetails}
+            newItem={newItem}
+            setNewItem={setNewItem}
+            handleDetailUpdate={handleDetailUpdate}
+            handleRemoveDetail={handleRemoveDetail}
+            handleKeyDown={handleKeyDown}
+          />
         );
       default: // note type
         return (
-          <div ref={contentAreaRef} className="relative" onPaste={handlePaste}>
-            {/* TipTap Editor */}
-            <EditorContent
-              editor={editor}
-              className={isEditing ? "cursor-text prose-sm" : "cursor-pointer"}
-              onClick={(e) => {
-                if (selected && !isEditing) {
-                  e.stopPropagation();
-                  setIsEditing(true);
-                }
-              }}
-            />
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-          </div>
+          <NoteCard
+            editor={editor}
+            isEditing={isEditing}
+            selected={selected}
+            setIsEditing={setIsEditing}
+            handlePaste={handlePaste}
+            fileInputRef={fileInputRef}
+            handleFileChange={handleFileChange}
+          />
         );
     }
   };
