@@ -12,11 +12,14 @@ interface ImageCardProps {
       details: string[];
       type: string;
       html?: string;
+      width?: number;
+      height?: number;
     }>
   ) => void;
   handlePaste: (e: React.ClipboardEvent) => void;
   handleImageUpload: () => void;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
 }
 
 function ImageCard({
@@ -27,9 +30,8 @@ function ImageCard({
   handlePaste,
   handleImageUpload,
   handleFileChange,
+  fileInputRef,
 }: ImageCardProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   return (
     <div className="bg-white h-40 flex flex-col items-center justify-center">
       {details[0] ? (

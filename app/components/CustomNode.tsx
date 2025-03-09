@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo, memo, useCallback } from "react";
 import { Handle, Position, NodeProps } from "reactflow";
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import { TrashIcon } from "lucide-react";
@@ -18,6 +18,8 @@ interface CustomNodeData {
   content: string;
   details: string[];
   html?: string;
+  width?: number;
+  height?: number;
   onUpdate?: (
     id: string,
     updates: Partial<{
@@ -25,6 +27,8 @@ interface CustomNodeData {
       details: string[];
       type: string;
       html?: string;
+      width?: number;
+      height?: number;
     }>
   ) => void;
   onDelete?: (id: string) => void;
@@ -55,7 +59,10 @@ function CustomNode({ id, data, selected }: NodeProps<CustomNodeData>) {
         : "<p>Click to add content...</p>"),
     onUpdate: ({ editor }) => {
       if (data.onUpdate) {
-        data.onUpdate(id, { html: editor.getHTML() });
+        data.onUpdate(id, {
+          content: editor.getText(),
+          html: editor.getHTML(),
+        });
       }
     },
     editable: false, // Start as non-editable
@@ -68,13 +75,6 @@ function CustomNode({ id, data, selected }: NodeProps<CustomNodeData>) {
     }
   }, [isEditing, editor]);
 
-  // Handle card click - if already selected, enter edit mode
-  const handleCardClick = useCallback(() => {
-    if (selected && !isEditing) {
-      setIsEditing(true);
-    }
-  }, [selected, isEditing, setIsEditing]);
-
   // Focus editor when entering edit mode
   useEffect(() => {
     if (isEditing && editor) {
@@ -83,6 +83,13 @@ function CustomNode({ id, data, selected }: NodeProps<CustomNodeData>) {
       }, 10);
     }
   }, [isEditing, editor]);
+
+  // Handle card click - if already selected, enter edit mode
+  const handleCardClick = useCallback(() => {
+    if (selected && !isEditing) {
+      setIsEditing(true);
+    }
+  }, [selected, isEditing, setIsEditing]);
 
   // Exit edit mode when card is no longer selected
   useEffect(() => {
@@ -160,25 +167,6 @@ function CustomNode({ id, data, selected }: NodeProps<CustomNodeData>) {
     },
     [data.type, editor, id, data.onUpdate, setEditableDetails]
   );
-
-  // Handle adding a new detail item
-  const handleAddDetail = useCallback(() => {
-    if (newItem.trim() !== "") {
-      const newDetails = [...editableDetails, newItem];
-      setEditableDetails(newDetails);
-      setNewItem("");
-      if (data.onUpdate) {
-        data.onUpdate(id, { details: newDetails });
-      }
-    }
-  }, [
-    newItem,
-    editableDetails,
-    setEditableDetails,
-    setNewItem,
-    data.onUpdate,
-    id,
-  ]);
 
   // Handle removing a detail item
   const handleRemoveDetail = useCallback(
@@ -270,6 +258,7 @@ function CustomNode({ id, data, selected }: NodeProps<CustomNodeData>) {
             handlePaste={handlePaste}
             handleImageUpload={handleImageUpload}
             handleFileChange={handleFileChange}
+            fileInputRef={fileInputRef}
           />
         );
       case "link":
@@ -339,15 +328,57 @@ function CustomNode({ id, data, selected }: NodeProps<CustomNodeData>) {
           : selected
           ? "shadow-md"
           : "shadow-sm"
-      } ${data.type === "image" ? "w-64" : "w-72"} text-xs relative`}
+      } text-xs relative overflow-hidden`}
       onClick={handleCardClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}
       data-editing={isEditing ? "true" : "false"}
       style={{
         cursor: isEditing ? "text" : "pointer",
+        width: data.width || (data.type === "image" ? "fit-content" : "288px"),
+        height: data.height || "auto",
+        minWidth: "200px",
+        minHeight: "100px",
       }}
     >
+      {/* Resize Controls - Only visible when selected and not editing */}
+      {selected && !isEditing && (
+        <>
+          <div
+            className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize"
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              const startX = e.clientX;
+              const startY = e.clientY;
+              const startWidth = data.width || 288;
+              const startHeight = data.height || 100;
+
+              const onMouseMove = (moveEvent: MouseEvent) => {
+                const deltaX = moveEvent.clientX - startX;
+                const deltaY = moveEvent.clientY - startY;
+
+                if (data.onUpdate) {
+                  data.onUpdate(id, {
+                    width: Math.max(200, startWidth + deltaX),
+                    height: Math.max(100, startHeight + deltaY),
+                  });
+                }
+              };
+
+              const onMouseUp = () => {
+                document.removeEventListener("mousemove", onMouseMove);
+                document.removeEventListener("mouseup", onMouseUp);
+              };
+
+              document.addEventListener("mousemove", onMouseMove);
+              document.addEventListener("mouseup", onMouseUp);
+            }}
+          >
+            <div className="w-0 h-0 border-b-8 border-r-8 border-gray-400 absolute bottom-0 right-0"></div>
+          </div>
+        </>
+      )}
+
       {/* Delete Button - Only visible when selected but not editing */}
       {selected && !isEditing && (
         <button
@@ -364,76 +395,79 @@ function CustomNode({ id, data, selected }: NodeProps<CustomNodeData>) {
         </button>
       )}
 
-      {/* Source Handles - always render but only show when selected and not editing */}
-      <Handle
-        type="source"
-        position={Position.Right}
-        id="right"
-        className={`w-2 h-2 bg-indigo-500 ${
-          selected && !isEditing ? "opacity-0 hover:opacity-70" : "opacity-0"
-        } transition-opacity`}
-      />
-      <Handle
-        type="source"
-        position={Position.Left}
-        id="left"
-        className={`w-2 h-2 bg-indigo-500 ${
-          selected && !isEditing ? "opacity-0 hover:opacity-70" : "opacity-0"
-        } transition-opacity`}
-      />
-      <Handle
-        type="source"
-        position={Position.Top}
-        id="top"
-        className={`w-2 h-2 bg-indigo-500 ${
-          selected && !isEditing ? "opacity-0 hover:opacity-70" : "opacity-0"
-        } transition-opacity`}
-      />
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        id="bottom"
-        className={`w-2 h-2 bg-indigo-500 ${
-          selected && !isEditing ? "opacity-0 hover:opacity-70" : "opacity-0"
-        } transition-opacity`}
-      />
-
-      {/* Target Handles - always render but only show when selected and not editing */}
-      <Handle
-        type="target"
-        position={Position.Right}
-        id="right"
-        className={`w-2 h-2 bg-blue-500 ${
-          selected && !isEditing ? "opacity-0 hover:opacity-70" : "opacity-0"
-        } transition-opacity`}
-      />
-      <Handle
-        type="target"
-        position={Position.Left}
-        id="left"
-        className={`w-2 h-2 bg-blue-500 ${
-          selected && !isEditing ? "opacity-0 hover:opacity-70" : "opacity-0"
-        } transition-opacity`}
-      />
-      <Handle
-        type="target"
-        position={Position.Top}
-        id="top"
-        className={`w-2 h-2 bg-blue-500 ${
-          selected && !isEditing ? "opacity-0 hover:opacity-70" : "opacity-0"
-        } transition-opacity`}
-      />
-      <Handle
-        type="target"
-        position={Position.Bottom}
-        id="bottom"
-        className={`w-2 h-2 bg-blue-500 ${
-          selected && !isEditing ? "opacity-0 hover:opacity-70" : "opacity-0"
-        } transition-opacity`}
-      />
-
       {/* Card Content */}
-      <div className="p-3 group">{cardContent}</div>
+      <div className="p-3 group w-full h-full overflow-auto">{cardContent}</div>
+
+      {/* Connection Handles - Always visible */}
+      {/* Right Handle */}
+      <div className="absolute right-0 top-1/2 transform -translate-y-1/2 z-50">
+        <div className="relative group">
+          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-2 text-indigo-600 text-lg font-bold animate-pulse">
+            →
+          </div>
+          <Handle
+            type="source"
+            position={Position.Right}
+            id="right"
+            className="w-10 h-10 rounded-md bg-indigo-500 opacity-80 hover:opacity-100 transition-opacity shadow-lg"
+            style={{ right: -5, border: "2px solid white" }}
+          />
+          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-10 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+            Drag to connect
+          </div>
+        </div>
+      </div>
+
+      {/* Left Handle */}
+      <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-50">
+        <div className="relative group">
+          <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-2 text-blue-600 text-lg font-bold animate-pulse">
+            ←
+          </div>
+          <Handle
+            type="target"
+            position={Position.Left}
+            id="left"
+            className="w-10 h-10 rounded-md bg-blue-500 opacity-80 hover:opacity-100 transition-opacity shadow-lg"
+            style={{ left: -5, border: "2px solid white" }}
+          />
+          <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-10 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+            Drop connection here
+          </div>
+        </div>
+      </div>
+
+      {/* Top Handle */}
+      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 z-50">
+        <div className="relative group">
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 text-indigo-600 text-lg font-bold animate-pulse">
+            ↑
+          </div>
+          <Handle
+            type="source"
+            position={Position.Top}
+            id="top"
+            className="w-10 h-10 rounded-md bg-indigo-500 opacity-80 hover:opacity-100 transition-opacity shadow-lg"
+            style={{ top: -5, border: "2px solid white" }}
+          />
+        </div>
+      </div>
+
+      {/* Bottom Handle */}
+      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-50">
+        <div className="relative group">
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-2 text-blue-600 text-lg font-bold animate-pulse">
+            ↓
+          </div>
+          <Handle
+            type="target"
+            position={Position.Bottom}
+            id="bottom"
+            className="w-10 h-10 rounded-md bg-blue-500 opacity-80 hover:opacity-100 transition-opacity shadow-lg"
+            style={{ bottom: -5, border: "2px solid white" }}
+          />
+        </div>
+      </div>
     </div>
   );
 }

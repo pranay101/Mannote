@@ -19,6 +19,7 @@ import ReactFlow, {
   useReactFlow,
   ReactFlowProvider,
   NodeChange,
+  EdgeTypes,
 } from "reactflow";
 import "reactflow/dist/style.css";
 
@@ -31,10 +32,16 @@ import {
 } from "lucide-react";
 import BoardSidebar from "@/app/components/BoardSidebar";
 import CustomNode from "@/app/components/CustomNode";
+import CustomEdge from "@/app/components/CustomEdge";
 
 // Define node types
 const nodeTypes: NodeTypes = {
   custom: CustomNode,
+};
+
+// Define edge types
+const edgeTypes: EdgeTypes = {
+  custom: CustomEdge,
 };
 
 // Sample data for initial nodes
@@ -132,6 +139,8 @@ const initialEdges: Edge[] = [
     target: "2",
     sourceHandle: "right",
     targetHandle: "left",
+    type: "custom",
+    data: { label: "connects to" },
     markerEnd: {
       type: MarkerType.ArrowClosed,
     },
@@ -142,10 +151,11 @@ const initialEdges: Edge[] = [
     target: "3",
     sourceHandle: "right",
     targetHandle: "left",
+    type: "custom",
+    data: { label: "uses" },
     markerEnd: {
       type: MarkerType.ArrowClosed,
     },
-    label: "uses",
   },
 ];
 
@@ -196,6 +206,8 @@ function Flow({ boardId }: { boardId: string }) {
         ...params,
         sourceHandle: params.sourceHandle || "right",
         targetHandle: params.targetHandle || "left",
+        type: "custom", // Use our custom edge
+        data: { label: "" }, // Initialize with empty label
         markerEnd: { type: MarkerType.ArrowClosed },
       };
 
@@ -315,6 +327,39 @@ function Flow({ boardId }: { boardId: string }) {
   // Memoize node types to prevent unnecessary re-renders
   const memoizedNodeTypes = useMemo(() => nodeTypes, []);
 
+  // Memoize edge types to prevent unnecessary re-renders
+  const memoizedEdgeTypes = useMemo(() => edgeTypes, []);
+
+  // Define connection line style
+  const connectionLineStyle = useMemo(
+    () => ({
+      strokeWidth: 3,
+      stroke: "#6366f1", // indigo-500
+      strokeDasharray: "5,5",
+      animation: "dashdraw 0.5s linear infinite",
+    }),
+    []
+  );
+
+  // Add CSS for the animation
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.innerHTML = `
+      @keyframes dashdraw {
+        0% {
+          stroke-dashoffset: 10;
+        }
+        100% {
+          stroke-dashoffset: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Board Sidebar */}
@@ -372,6 +417,8 @@ function Flow({ boardId }: { boardId: string }) {
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             nodeTypes={memoizedNodeTypes}
+            edgeTypes={memoizedEdgeTypes}
+            connectionLineStyle={connectionLineStyle}
             onInit={setReactFlowInstance}
             fitView
             minZoom={0.1}
@@ -395,6 +442,27 @@ function Flow({ boardId }: { boardId: string }) {
                 <PlusIcon className="h-4 w-4" />
                 <span>Add Note</span>
               </button>
+            </Panel>
+
+            {/* Helper message */}
+            <Panel
+              position="bottom-center"
+              className="bg-indigo-600 p-3 rounded-md shadow-md mb-4 text-sm text-white font-medium"
+            >
+              <div className="flex items-center space-x-4">
+                <span className="flex items-center">
+                  <span className="mr-2">👉</span>
+                  <span>
+                    Select a card and use the colored handles to create
+                    connections
+                  </span>
+                </span>
+                <span>•</span>
+                <span className="flex items-center">
+                  <span className="mr-2">✏️</span>
+                  <span>Click on connection labels to edit them</span>
+                </span>
+              </div>
             </Panel>
           </ReactFlow>
         </div>
