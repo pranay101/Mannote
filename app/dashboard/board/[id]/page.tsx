@@ -30,6 +30,7 @@ import {
   Share2Icon,
   SettingsIcon,
   PlusIcon,
+  XIcon,
 } from "lucide-react";
 import BoardSidebar from "@/app/components/BoardSidebar";
 import CustomNode from "@/app/components/CustomNode";
@@ -168,6 +169,7 @@ function Flow({ boardId }: { boardId: string }) {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [reactFlowInstance, setReactFlowInstance] =
     useState<ReactFlowInstance | null>(null);
+  const [showHelperText, setShowHelperText] = useState(true);
   const { project } = useReactFlow();
 
   // Custom node change handler to prevent dragging active nodes
@@ -456,25 +458,36 @@ function Flow({ boardId }: { boardId: string }) {
               </button>
             </Panel>
 
-            {/* Helper message */}
-            <Panel
-              position="bottom-center"
-              className="bg-indigo-600 p-3 rounded-md shadow-md mb-4 text-sm text-white font-medium"
-            >
-              <div className="flex items-center space-x-4">
-                <span className="flex items-center">
-                  <span className="mr-2 flex items-center justify-center">
-                    <span className="w-3 h-3 rounded-full bg-white inline-block"></span>
-                  </span>
-                  <span>Use the circular handles to connect cards</span>
-                </span>
-                <span>•</span>
-                <span className="flex items-center">
-                  <span className="mr-2">✏️</span>
-                  <span>Click on connection labels to edit them</span>
-                </span>
-              </div>
-            </Panel>
+            {/* Helper message with dismiss button */}
+            {showHelperText && (
+              <Panel
+                position="bottom-center"
+                className="bg-indigo-500/80 backdrop-blur-sm p-3 rounded-md shadow-md mb-4 text-xs text-white font-medium transition-opacity duration-300"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <span className="flex items-center">
+                      <span className="mr-2 flex items-center justify-center">
+                        <span className="w-2 h-2 rounded-full bg-white inline-block"></span>
+                      </span>
+                      <span>Use the circular handles to connect cards</span>
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center">
+                      <span className="mr-2">✏️</span>
+                      <span>Click on connection labels to edit them</span>
+                    </span>
+                  </div>
+                  <button 
+                    onClick={() => setShowHelperText(false)}
+                    className="ml-3 text-white hover:text-gray-200 focus:outline-none"
+                    aria-label="Close helper text"
+                  >
+                    <XIcon className="h-4 w-4" />
+                  </button>
+                </div>
+              </Panel>
+            )}
           </ReactFlow>
         </div>
       </div>
