@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   LayoutGridIcon,
@@ -28,7 +29,12 @@ export default function Home() {
             transition={{ duration: 0.5 }}
             className="text-2xl font-bold bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent"
           >
-            mannote
+            <Image
+              src="/Mannotelogo.svg"
+              alt="Mannote"
+              width={32}
+              height={32}
+            />
           </motion.span>
         </div>
         <div className="hidden md:flex items-center gap-8">

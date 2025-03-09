@@ -9,21 +9,26 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@auth/mongodb-adapter": "^3.8.0",
     "@tailwindcss/line-clamp": "^0.4.4",
     "@tailwindcss/typography": "^0.5.16",
     "@tiptap/extension-image": "^2.11.5",
     "@tiptap/react": "^2.11.5",
     "@tiptap/starter-kit": "^2.11.5",
+    "@types/uuid": "^10.0.0",
     "cheerio": "^1.0.0",
     "framer-motion": "^12.4.10",
     "html-react-parser": "^5.2.2",
     "lucide-react": "^0.479.0",
+    "mongodb": "^6.14.2",
     "next": "15.2.1",
+    "next-auth": "^4.24.11",
     "react": "^19.0.0",
     "react-contenteditable": "^3.3.7",
     "react-dom": "^19.0.0",
     "reactflow": "^11.11.4",
-    "tiptap": "^1.32.2"
+    "tiptap": "^1.32.2",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

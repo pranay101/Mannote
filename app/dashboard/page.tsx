@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -10,27 +10,171 @@ import {
   ListIcon,
   MoreHorizontalIcon,
   FolderIcon,
+  Loader2Icon,
+  AlertCircleIcon,
 } from "lucide-react";
-
-// Sample data for boards
-const initialBoards = [
-  { id: 1, title: "Project Planning", cards: 8, lastUpdated: "2 days ago" },
-  { id: 2, title: "Design Ideas", cards: 12, lastUpdated: "5 hours ago" },
-  { id: 3, title: "Content Strategy", cards: 5, lastUpdated: "1 week ago" },
-  { id: 4, title: "Marketing Campaign", cards: 15, lastUpdated: "3 days ago" },
-  { id: 5, title: "Product Roadmap", cards: 10, lastUpdated: "Yesterday" },
-  { id: 6, title: "Team Goals", cards: 7, lastUpdated: "Just now" },
-];
+import { useRouter } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
+import { Board } from "@/lib/models";
 
 export default function Dashboard() {
-  const [boards, setBoards] = useState(initialBoards);
+  const router = useRouter();
+  const { data: session, status } = useSession();
+  const [boards, setBoards] = useState<Board[]>([]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
+  const [newBoardTitle, setNewBoardTitle] = useState("");
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  console.log(status, session, "dashboard");
+  // Add a periodic check to verify the session is still valid
+  useEffect(() => {
+    if (status !== "authenticated") return;
+
+    const checkSession = async () => {
+      try {
+        const res = await fetch("/api/auth/session");
+        if (!res.ok) {
+          handleSignOut();
+        }
+      } catch (err) {
+        console.error("Session check failed:", err);
+      }
+    };
+
+    // Check session every 5 minutes
+    const interval = setInterval(checkSession, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [status]);
+
+  const fetchBoards = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await fetch("/api/boards");
+
+      if (response.status === 401) {
+        // Session expired or invalid
+        await handleSignOut();
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch boards");
+      }
+
+      const data = await response.json();
+      setBoards(data);
+    } catch (error) {
+      console.error("Error fetching boards:", error);
+      setError("Failed to load your boards. Please try refreshing the page.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Fetch boards when component mounts
+  useEffect(() => {
+    if (status === "authenticated" && session) {
+      fetchBoards();
+    } else if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, session, router, fetchBoards]);
+
+  const createNewBoard = async () => {
+    if (!newBoardTitle.trim()) return;
+
+    try {
+      setIsCreating(true);
+      setError(null);
+      const response = await fetch("/api/boards", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ title: newBoardTitle }),
+      });
+
+      if (response.status === 401) {
+        // Session expired or invalid
+        await handleSignOut();
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("Failed to create board");
+      }
+
+      const newBoard = await response.json();
+      setBoards([newBoard, ...boards]);
+      setNewBoardTitle("");
+      setShowCreateForm(false);
+    } catch (error) {
+      console.error("Error creating board:", error);
+      setError("Failed to create board. Please try again.");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      // Sign out and redirect to login page
+      await signOut({ callbackUrl: "/login" });
+    } catch (error) {
+      console.error("Sign out error:", error);
+      // Force redirect to login if there's an error
+      router.push("/login");
+    }
+  };
 
   // Filter boards based on search query
   const filteredBoards = boards.filter((board) =>
     board.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Format date for display
+  const formatDate = (date: Date) => {
+    const d = new Date(date);
+    const now = new Date();
+    const diff = now.getTime() - d.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor(diff / (1000 * 60));
+
+    if (days > 0) {
+      return days === 1 ? "Yesterday" : `${days} days ago`;
+    } else if (hours > 0) {
+      return `${hours} hours ago`;
+    } else if (minutes > 0) {
+      return `${minutes} minutes ago`;
+    } else {
+      return "Just now";
+    }
+  };
+
+  // If session is loading, show loading spinner
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2Icon className="h-8 w-8 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
+  // If not authenticated, redirect to login
+  if (status === "unauthenticated") {
+    router.push("/login");
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2Icon className="h-8 w-8 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -46,8 +190,11 @@ export default function Dashboard() {
               </Link>
             </div>
             <div className="flex items-center space-x-4">
-              <button className="p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100">
-                <span className="sr-only">Notifications</span>
+              <button
+                className="p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                onClick={handleSignOut}
+              >
+                <span className="sr-only">Sign Out</span>
                 <svg
                   className="h-6 w-6"
                   fill="none"
@@ -58,7 +205,7 @@ export default function Dashboard() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                   />
                 </svg>
               </button>
@@ -66,7 +213,7 @@ export default function Dashboard() {
                 <button className="flex items-center max-w-xs rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                   <span className="sr-only">Open user menu</span>
                   <div className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white">
-                    U
+                    {session?.user?.name?.charAt(0) || "U"}
                   </div>
                 </button>
               </div>
@@ -115,137 +262,230 @@ export default function Dashboard() {
                 <ListIcon className="h-5 w-5" />
               </button>
             </div>
-            <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <button
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              onClick={() => setShowCreateForm(true)}
+            >
               <PlusIcon className="h-5 w-5 mr-2" />
               New Board
             </button>
           </div>
         </div>
 
-        {/* Boards Grid */}
-        {viewMode === "grid" ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Create New Board Card */}
-            <motion.div
-              whileHover={{
-                y: -5,
-                boxShadow:
-                  "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-              }}
-              className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center text-center h-64 cursor-pointer hover:border-indigo-500 transition-colors"
-            >
-              <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
-                <PlusIcon className="h-6 w-6 text-indigo-600" />
+        {/* Error message */}
+        {error && (
+          <div className="mb-6 bg-red-50 border-l-4 border-red-400 p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <AlertCircleIcon className="h-5 w-5 text-red-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-1">
-                Create New Board
-              </h3>
-              <p className="text-sm text-gray-500">
-                Start organizing your ideas
-              </p>
-            </motion.div>
+              <div className="ml-3">
+                <p className="text-sm text-red-700">{error}</p>
+                <div className="mt-2">
+                  <button
+                    className="text-sm text-red-700 font-medium underline"
+                    onClick={() => {
+                      setError(null);
+                      fetchBoards();
+                    }}
+                  >
+                    Try again
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
-            {/* Board Cards */}
-            {filteredBoards.map((board) => (
-              <motion.div
-                key={board.id}
-                whileHover={{
-                  y: -5,
-                  boxShadow:
-                    "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-                }}
-                className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
-              >
-                <Link href={`/dashboard/board/${board.id}`}>
-                  <div className="h-40 bg-gradient-to-br from-indigo-50 to-purple-50 p-4">
-                    <div className="grid grid-cols-2 grid-rows-2 gap-2 h-full opacity-50">
-                      <div className="bg-white rounded shadow-sm"></div>
-                      <div className="bg-white rounded shadow-sm"></div>
-                      <div className="bg-white rounded shadow-sm"></div>
-                      <div className="bg-white rounded shadow-sm"></div>
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-1">
-                          {board.title}
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                          {board.cards} cards • Updated {board.lastUpdated}
-                        </p>
-                      </div>
-                      <button className="p-1 rounded-full text-gray-400 hover:text-gray-500">
-                        <MoreHorizontalIcon className="h-5 w-5" />
-                      </button>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <Loader2Icon className="h-8 w-8 animate-spin text-indigo-600" />
           </div>
         ) : (
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
-            <ul className="divide-y divide-gray-200">
-              {/* Create New Board Item */}
-              <li>
-                <div className="px-6 py-4 flex items-center hover:bg-gray-50 cursor-pointer">
-                  <div className="min-w-0 flex-1 flex items-center">
-                    <div className="flex-shrink-0">
-                      <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                        <PlusIcon className="h-5 w-5 text-indigo-600" />
-                      </div>
-                    </div>
-                    <div className="min-w-0 flex-1 px-4">
-                      <div>
-                        <p className="text-sm font-medium text-indigo-600 truncate">
-                          Create New Board
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Start organizing your ideas
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </li>
-
-              {/* Board List Items */}
-              {filteredBoards.map((board) => (
-                <li key={board.id}>
-                  <Link
-                    href={`/dashboard/board/${board.id}`}
-                    className="block hover:bg-gray-50"
+          <>
+            {/* Create New Board Form */}
+            {showCreateForm && (
+              <div className="mb-8 bg-white p-6 rounded-lg shadow-sm">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  Create New Board
+                </h3>
+                <div className="flex items-center">
+                  <input
+                    type="text"
+                    placeholder="Enter board title..."
+                    className="block w-full px-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm mr-4"
+                    value={newBoardTitle}
+                    onChange={(e) => setNewBoardTitle(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") createNewBoard();
+                    }}
+                  />
+                  <button
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                    onClick={createNewBoard}
+                    disabled={isCreating || !newBoardTitle.trim()}
                   >
-                    <div className="px-6 py-4 flex items-center">
+                    {isCreating ? (
+                      <Loader2Icon className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <PlusIcon className="h-4 w-4 mr-2" />
+                    )}
+                    Create
+                  </button>
+                  <button
+                    className="ml-2 inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    onClick={() => setShowCreateForm(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Boards Grid */}
+            {viewMode === "grid" ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Create New Board Card */}
+                <motion.div
+                  whileHover={{
+                    y: -5,
+                    boxShadow:
+                      "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                  }}
+                  className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center text-center h-64 cursor-pointer hover:border-indigo-500 transition-colors"
+                  onClick={() => setShowCreateForm(true)}
+                >
+                  <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
+                    <PlusIcon className="h-6 w-6 text-indigo-600" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-1">
+                    Create New Board
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Start organizing your ideas
+                  </p>
+                </motion.div>
+
+                {/* Board Cards */}
+                {filteredBoards.length === 0 ? (
+                  <div className="col-span-full text-center py-12 text-gray-500">
+                    No boards found. Create your first board to get started!
+                  </div>
+                ) : (
+                  filteredBoards.map((board) => (
+                    <motion.div
+                      key={board.id}
+                      whileHover={{
+                        y: -5,
+                        boxShadow:
+                          "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                      }}
+                      className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <Link href={`/dashboard/board/${board.id}`}>
+                        <div className="h-40 bg-gradient-to-br from-indigo-50 to-purple-50 p-4">
+                          <div className="grid grid-cols-2 grid-rows-2 gap-2 h-full opacity-50">
+                            <div className="bg-white rounded shadow-sm"></div>
+                            <div className="bg-white rounded shadow-sm"></div>
+                            <div className="bg-white rounded shadow-sm"></div>
+                            <div className="bg-white rounded shadow-sm"></div>
+                          </div>
+                        </div>
+                        <div className="p-4">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="text-lg font-medium text-gray-900 mb-1">
+                                {board.title}
+                              </h3>
+                              <p className="text-sm text-gray-500">
+                                {board.cards?.length || 0} cards • Updated{" "}
+                                {formatDate(board.updatedAt)}
+                              </p>
+                            </div>
+                            <button className="p-1 rounded-full text-gray-400 hover:text-gray-500">
+                              <MoreHorizontalIcon className="h-5 w-5" />
+                            </button>
+                          </div>
+                        </div>
+                      </Link>
+                    </motion.div>
+                  ))
+                )}
+              </div>
+            ) : (
+              <div className="bg-white shadow overflow-hidden sm:rounded-md">
+                <ul className="divide-y divide-gray-200">
+                  {/* Create New Board Item */}
+                  <li>
+                    <div
+                      className="px-6 py-4 flex items-center hover:bg-gray-50 cursor-pointer"
+                      onClick={() => setShowCreateForm(true)}
+                    >
                       <div className="min-w-0 flex-1 flex items-center">
                         <div className="flex-shrink-0">
                           <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                            <FolderIcon className="h-5 w-5 text-indigo-600" />
+                            <PlusIcon className="h-5 w-5 text-indigo-600" />
                           </div>
                         </div>
                         <div className="min-w-0 flex-1 px-4">
                           <div>
-                            <p className="text-sm font-medium text-gray-900 truncate">
-                              {board.title}
+                            <p className="text-sm font-medium text-indigo-600 truncate">
+                              Create New Board
                             </p>
                             <p className="text-sm text-gray-500">
-                              {board.cards} cards • Updated {board.lastUpdated}
+                              Start organizing your ideas
                             </p>
                           </div>
                         </div>
-                        <div>
-                          <button className="p-1 rounded-full text-gray-400 hover:text-gray-500">
-                            <MoreHorizontalIcon className="h-5 w-5" />
-                          </button>
-                        </div>
                       </div>
                     </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+                  </li>
+
+                  {/* Board List Items */}
+                  {filteredBoards.length === 0 ? (
+                    <li className="px-6 py-12 text-center text-gray-500">
+                      No boards found. Create your first board to get started!
+                    </li>
+                  ) : (
+                    filteredBoards.map((board) => (
+                      <li key={board.id}>
+                        <Link
+                          href={`/dashboard/board/${board.id}`}
+                          className="block hover:bg-gray-50"
+                        >
+                          <div className="px-6 py-4 flex items-center">
+                            <div className="min-w-0 flex-1 flex items-center">
+                              <div className="flex-shrink-0">
+                                <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                                  <FolderIcon className="h-5 w-5 text-indigo-600" />
+                                </div>
+                              </div>
+                              <div className="min-w-0 flex-1 px-4">
+                                <div>
+                                  <p className="text-sm font-medium text-gray-900 truncate">
+                                    {board.title}
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    {board.cards?.length || 0} cards • Updated{" "}
+                                    {formatDate(board.updatedAt)}
+                                  </p>
+                                </div>
+                              </div>
+                              <div>
+                                <button className="p-1 rounded-full text-gray-400 hover:text-gray-500">
+                                  <MoreHorizontalIcon className="h-5 w-5" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
+                      </li>
+                    ))
+                  )}
+                </ul>
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>

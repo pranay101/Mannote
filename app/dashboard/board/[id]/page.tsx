@@ -1,40 +1,39 @@
 "use client";
 
-import { useState, useRef, useCallback, useMemo, useEffect } from "react";
-import { use } from "react";
 import Link from "next/link";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactFlow, {
-  MiniMap,
-  Controls,
-  Background,
-  useNodesState,
-  useEdgesState,
   addEdge,
+  Background,
   Connection,
+  Controls,
   Edge,
-  Node,
-  NodeTypes,
-  MarkerType,
-  Panel,
-  useReactFlow,
-  ReactFlowProvider,
-  NodeChange,
   EdgeTypes,
+  MarkerType,
+  MiniMap,
+  Node,
+  NodeChange,
+  NodeTypes,
+  Panel,
   ReactFlowInstance,
+  ReactFlowProvider,
+  useEdgesState,
+  useNodesState,
+  useReactFlow,
 } from "reactflow";
 import "reactflow/dist/style.css";
 
+import BoardSidebar from "@/app/components/BoardSidebar";
+import CustomEdge from "@/app/components/CustomEdge";
+import CustomNode from "@/app/components/CustomNode";
 import {
   ArrowLeftIcon,
-  SearchIcon,
-  Share2Icon,
-  SettingsIcon,
   PlusIcon,
+  SearchIcon,
+  SettingsIcon,
+  Share2Icon,
   XIcon,
 } from "lucide-react";
-import BoardSidebar from "@/app/components/BoardSidebar";
-import CustomNode from "@/app/components/CustomNode";
-import CustomEdge from "@/app/components/CustomEdge";
 
 // Define node types
 const nodeTypes: NodeTypes = {
@@ -478,7 +477,7 @@ function Flow({ boardId }: { boardId: string }) {
                       <span>Click on connection labels to edit them</span>
                     </span>
                   </div>
-                  <button 
+                  <button
                     onClick={() => setShowHelperText(false)}
                     className="ml-3 text-white hover:text-gray-200 focus:outline-none"
                     aria-label="Close helper text"
@@ -501,10 +500,9 @@ interface BoardParams {
 }
 
 // Board component with React Flow Provider
-export default function Board({ params }: { params: Record<string, unknown> }) {
-  // Unwrap params using React.use()
-  const unwrappedParams = use(params) as BoardParams;
-  const boardId = unwrappedParams.id;
+export default function Board({ params }: { params: BoardParams }) {
+  // No need to unwrap params as they're already typed correctly
+  const boardId = params.id;
 
   return (
     <ReactFlowProvider>
