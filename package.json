@@ -9,9 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tailwindcss/line-clamp": "^0.4.4",
+    "@tailwindcss/typography": "^0.5.16",
     "@tiptap/extension-image": "^2.11.5",
     "@tiptap/react": "^2.11.5",
     "@tiptap/starter-kit": "^2.11.5",
+    "cheerio": "^1.0.0",
     "framer-motion": "^12.4.10",
     "html-react-parser": "^5.2.2",
     "lucide-react": "^0.479.0",
