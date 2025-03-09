@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, memo } from "react";
 import { EditorContent, Editor } from "@tiptap/react";
 
 interface NoteCardProps {
@@ -11,7 +11,7 @@ interface NoteCardProps {
   handleFileChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export default function NoteCard({
+function NoteCard({
   editor,
   isEditing,
   selected,
@@ -46,3 +46,5 @@ export default function NoteCard({
     </div>
   );
 }
+
+export default memo(NoteCard);

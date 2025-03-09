@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, memo, useCallback } from "react";
 import { Handle, Position, NodeProps } from "reactflow";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -30,11 +30,7 @@ interface CustomNodeData {
   onDelete?: (id: string) => void;
 }
 
-export default function CustomNode({
-  id,
-  data,
-  selected,
-}: NodeProps<CustomNodeData>) {
+function CustomNode({ id, data, selected }: NodeProps<CustomNodeData>) {
   const [isEditing, setIsEditing] = useState(false);
   const [editableDetails, setEditableDetails] = useState<string[]>(
     data.details
@@ -73,11 +69,11 @@ export default function CustomNode({
   }, [isEditing, editor]);
 
   // Handle card click - if already selected, enter edit mode
-  const handleCardClick = () => {
+  const handleCardClick = useCallback(() => {
     if (selected && !isEditing) {
       setIsEditing(true);
     }
-  };
+  }, [selected, isEditing, setIsEditing]);
 
   // Focus editor when entering edit mode
   useEffect(() => {
@@ -113,54 +109,60 @@ export default function CustomNode({
   }, [isEditing]);
 
   // Handle detail item update
-  const handleDetailUpdate = (index: number, value: string) => {
-    const newDetails = [...editableDetails];
-    newDetails[index] = value;
-    setEditableDetails(newDetails);
-    if (data.onUpdate) {
-      data.onUpdate(id, { details: newDetails });
-    }
-  };
+  const handleDetailUpdate = useCallback(
+    (index: number, value: string) => {
+      const newDetails = [...editableDetails];
+      newDetails[index] = value;
+      setEditableDetails(newDetails);
+      if (data.onUpdate) {
+        data.onUpdate(id, { details: newDetails });
+      }
+    },
+    [editableDetails, setEditableDetails, data.onUpdate, id]
+  );
 
   // Handle paste for images
-  const handlePaste = (e: React.ClipboardEvent) => {
-    const items = e.clipboardData.items;
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent) => {
+      const items = e.clipboardData.items;
 
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].type.indexOf("image") !== -1) {
-        const blob = items[i].getAsFile();
-        if (blob) {
-          if (data.type === "image") {
-            e.preventDefault();
-            const reader = new FileReader();
-            reader.onload = (event) => {
-              const imageUrl = event.target?.result as string;
-              const newDetails = [imageUrl];
-              setEditableDetails(newDetails);
-              if (data.onUpdate) {
-                data.onUpdate(id, { details: newDetails });
-              }
-            };
-            reader.readAsDataURL(blob);
-            return;
-          } else if (data.type === "note" && editor) {
-            // For note cards, insert the image into the TipTap editor
-            e.preventDefault();
-            const reader = new FileReader();
-            reader.onload = (event) => {
-              const imageUrl = event.target?.result as string;
-              editor.chain().focus().setImage({ src: imageUrl }).run();
-            };
-            reader.readAsDataURL(blob);
-            return;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf("image") !== -1) {
+          const blob = items[i].getAsFile();
+          if (blob) {
+            if (data.type === "image") {
+              e.preventDefault();
+              const reader = new FileReader();
+              reader.onload = (event) => {
+                const imageUrl = event.target?.result as string;
+                const newDetails = [imageUrl];
+                setEditableDetails(newDetails);
+                if (data.onUpdate) {
+                  data.onUpdate(id, { details: newDetails });
+                }
+              };
+              reader.readAsDataURL(blob);
+              return;
+            } else if (data.type === "note" && editor) {
+              // For note cards, insert the image into the TipTap editor
+              e.preventDefault();
+              const reader = new FileReader();
+              reader.onload = (event) => {
+                const imageUrl = event.target?.result as string;
+                editor.chain().focus().setImage({ src: imageUrl }).run();
+              };
+              reader.readAsDataURL(blob);
+              return;
+            }
           }
         }
       }
-    }
-  };
+    },
+    [data.type, editor, id, data.onUpdate, setEditableDetails]
+  );
 
   // Handle adding a new detail item
-  const handleAddDetail = () => {
+  const handleAddDetail = useCallback(() => {
     if (newItem.trim() !== "") {
       const newDetails = [...editableDetails, newItem];
       setEditableDetails(newDetails);
@@ -169,63 +171,94 @@ export default function CustomNode({
         data.onUpdate(id, { details: newDetails });
       }
     }
-  };
+  }, [
+    newItem,
+    editableDetails,
+    setEditableDetails,
+    setNewItem,
+    data.onUpdate,
+    id,
+  ]);
 
   // Handle removing a detail item
-  const handleRemoveDetail = (index: number) => {
-    const newDetails = [...editableDetails];
-    newDetails.splice(index, 1);
-    setEditableDetails(newDetails);
-    if (data.onUpdate) {
-      data.onUpdate(id, { details: newDetails });
-    }
-  };
+  const handleRemoveDetail = useCallback(
+    (index: number) => {
+      const newDetails = [...editableDetails];
+      newDetails.splice(index, 1);
+      setEditableDetails(newDetails);
+      if (data.onUpdate) {
+        data.onUpdate(id, { details: newDetails });
+      }
+    },
+    [editableDetails, setEditableDetails, data.onUpdate, id]
+  );
 
   // Handle keydown events for adding new items
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleAddDetail();
-    }
-    if (e.key === "Delete" || e.key === "Backspace") {
-      // Only delete the node if Ctrl/Cmd is pressed with Delete/Backspace
-      if (e.ctrlKey || e.metaKey) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (data.onDelete) {
-          data.onDelete(id);
-        }
-      }
-    }
-  };
-
-  // Handle image upload
-  const handleImageUpload = () => {
-    fileInputRef.current?.click();
-  };
-
-  // Process uploaded image
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const imageUrl = event.target?.result as string;
-        if (data.type === "image") {
-          const newDetails = [imageUrl];
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") {
+        if (newItem.trim() !== "") {
+          const newDetails = [...editableDetails, newItem];
           setEditableDetails(newDetails);
+          setNewItem("");
           if (data.onUpdate) {
             data.onUpdate(id, { details: newDetails });
           }
-        } else if (editor) {
-          editor.chain().focus().setImage({ src: imageUrl }).run();
         }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+      }
+      if (e.key === "Delete" || e.key === "Backspace") {
+        // Only delete the node if Ctrl/Cmd is pressed with Delete/Backspace
+        if (e.ctrlKey || e.metaKey) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (data.onDelete) {
+            data.onDelete(id);
+          }
+        }
+      }
+    },
+    [
+      newItem,
+      editableDetails,
+      setEditableDetails,
+      setNewItem,
+      data.onUpdate,
+      data.onDelete,
+      id,
+    ]
+  );
 
-  // Render different content based on card type
-  const renderCardContent = () => {
+  // Handle image upload
+  const handleImageUpload = useCallback(() => {
+    fileInputRef.current?.click();
+  }, [fileInputRef]);
+
+  // Process uploaded image
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const imageUrl = event.target?.result as string;
+          if (data.type === "image") {
+            const newDetails = [imageUrl];
+            setEditableDetails(newDetails);
+            if (data.onUpdate) {
+              data.onUpdate(id, { details: newDetails });
+            }
+          } else if (editor) {
+            editor.chain().focus().setImage({ src: imageUrl }).run();
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    },
+    [data.type, editor, id, data.onUpdate, setEditableDetails]
+  );
+
+  // Memoize the renderCardContent function
+  const cardContent = useMemo(() => {
     switch (data.type) {
       case "image":
         return (
@@ -274,7 +307,28 @@ export default function CustomNode({
           />
         );
     }
-  };
+  }, [
+    data.type,
+    data.content,
+    data.details,
+    id,
+    data.onUpdate,
+    handlePaste,
+    handleImageUpload,
+    handleFileChange,
+    editableDetails,
+    setEditableDetails,
+    newItem,
+    setNewItem,
+    handleDetailUpdate,
+    handleRemoveDetail,
+    handleKeyDown,
+    editor,
+    isEditing,
+    selected,
+    setIsEditing,
+    fileInputRef,
+  ]);
 
   return (
     <div
@@ -310,38 +364,79 @@ export default function CustomNode({
         </button>
       )}
 
-      {/* Connection Handles - only visible when selected and not editing */}
-      {selected && !isEditing && (
-        <>
-          <Handle
-            type="source"
-            position={Position.Right}
-            id="right"
-            className="w-2 h-2 bg-indigo-500 opacity-0 hover:opacity-70 transition-opacity"
-          />
-          <Handle
-            type="source"
-            position={Position.Left}
-            id="left"
-            className="w-2 h-2 bg-indigo-500 opacity-0 hover:opacity-70 transition-opacity"
-          />
-          <Handle
-            type="source"
-            position={Position.Top}
-            id="top"
-            className="w-2 h-2 bg-indigo-500 opacity-0 hover:opacity-70 transition-opacity"
-          />
-          <Handle
-            type="source"
-            position={Position.Bottom}
-            id="bottom"
-            className="w-2 h-2 bg-indigo-500 opacity-0 hover:opacity-70 transition-opacity"
-          />
-        </>
-      )}
+      {/* Source Handles - always render but only show when selected and not editing */}
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="right"
+        className={`w-2 h-2 bg-indigo-500 ${
+          selected && !isEditing ? "opacity-0 hover:opacity-70" : "opacity-0"
+        } transition-opacity`}
+      />
+      <Handle
+        type="source"
+        position={Position.Left}
+        id="left"
+        className={`w-2 h-2 bg-indigo-500 ${
+          selected && !isEditing ? "opacity-0 hover:opacity-70" : "opacity-0"
+        } transition-opacity`}
+      />
+      <Handle
+        type="source"
+        position={Position.Top}
+        id="top"
+        className={`w-2 h-2 bg-indigo-500 ${
+          selected && !isEditing ? "opacity-0 hover:opacity-70" : "opacity-0"
+        } transition-opacity`}
+      />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        id="bottom"
+        className={`w-2 h-2 bg-indigo-500 ${
+          selected && !isEditing ? "opacity-0 hover:opacity-70" : "opacity-0"
+        } transition-opacity`}
+      />
+
+      {/* Target Handles - always render but only show when selected and not editing */}
+      <Handle
+        type="target"
+        position={Position.Right}
+        id="right"
+        className={`w-2 h-2 bg-blue-500 ${
+          selected && !isEditing ? "opacity-0 hover:opacity-70" : "opacity-0"
+        } transition-opacity`}
+      />
+      <Handle
+        type="target"
+        position={Position.Left}
+        id="left"
+        className={`w-2 h-2 bg-blue-500 ${
+          selected && !isEditing ? "opacity-0 hover:opacity-70" : "opacity-0"
+        } transition-opacity`}
+      />
+      <Handle
+        type="target"
+        position={Position.Top}
+        id="top"
+        className={`w-2 h-2 bg-blue-500 ${
+          selected && !isEditing ? "opacity-0 hover:opacity-70" : "opacity-0"
+        } transition-opacity`}
+      />
+      <Handle
+        type="target"
+        position={Position.Bottom}
+        id="bottom"
+        className={`w-2 h-2 bg-blue-500 ${
+          selected && !isEditing ? "opacity-0 hover:opacity-70" : "opacity-0"
+        } transition-opacity`}
+      />
 
       {/* Card Content */}
-      <div className="p-3 group">{renderCardContent()}</div>
+      <div className="p-3 group">{cardContent}</div>
     </div>
   );
 }
+
+// Export a memoized version of the component
+export default memo(CustomNode);

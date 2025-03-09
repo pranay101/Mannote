@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { CheckIcon, PlusIcon, XIcon } from "lucide-react";
 
 interface TodoCardProps {
@@ -9,7 +10,7 @@ interface TodoCardProps {
   handleKeyDown: (e: React.KeyboardEvent) => void;
 }
 
-export default function TodoCard({
+function TodoCard({
   editableDetails,
   newItem,
   setNewItem,
@@ -61,3 +62,5 @@ export default function TodoCard({
     </div>
   );
 }
+
+export default memo(TodoCard);

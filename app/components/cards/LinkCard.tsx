@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { LinkIcon } from "lucide-react";
 
 interface LinkCardProps {
@@ -17,7 +18,7 @@ interface LinkCardProps {
   ) => void;
 }
 
-export default function LinkCard({
+function LinkCard({
   content,
   details,
   id,
@@ -71,3 +72,5 @@ export default function LinkCard({
     </div>
   );
 }
+
+export default memo(LinkCard);

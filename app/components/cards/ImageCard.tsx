@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, memo } from "react";
 import { ImageIcon } from "lucide-react";
 
 interface ImageCardProps {
@@ -19,7 +19,7 @@ interface ImageCardProps {
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export default function ImageCard({
+function ImageCard({
   content,
   details,
   id,
@@ -64,3 +64,5 @@ export default function ImageCard({
     </div>
   );
 }
+
+export default memo(ImageCard);

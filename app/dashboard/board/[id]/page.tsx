@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import { use } from "react";
 import Link from "next/link";
 import ReactFlow, {
@@ -130,6 +130,8 @@ const initialEdges: Edge[] = [
     id: "e1-2",
     source: "1",
     target: "2",
+    sourceHandle: "right",
+    targetHandle: "left",
     markerEnd: {
       type: MarkerType.ArrowClosed,
     },
@@ -138,6 +140,8 @@ const initialEdges: Edge[] = [
     id: "e2-3",
     source: "2",
     target: "3",
+    sourceHandle: "right",
+    targetHandle: "left",
     markerEnd: {
       type: MarkerType.ArrowClosed,
     },
@@ -148,8 +152,9 @@ const initialEdges: Edge[] = [
 // Flow component
 function Flow({ boardId }: { boardId: string }) {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  // Initialize nodes first, without edges
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
   const { project } = useReactFlow();
 
@@ -185,16 +190,17 @@ function Flow({ boardId }: { boardId: string }) {
 
   // Handle connection
   const onConnect = useCallback(
-    (params: Connection) =>
-      setEdges((eds) =>
-        addEdge(
-          {
-            ...params,
-            markerEnd: { type: MarkerType.ArrowClosed },
-          },
-          eds
-        )
-      ),
+    (params: Connection) => {
+      // Ensure sourceHandle and targetHandle are defined
+      const connection = {
+        ...params,
+        sourceHandle: params.sourceHandle || "right",
+        targetHandle: params.targetHandle || "left",
+        markerEnd: { type: MarkerType.ArrowClosed },
+      };
+
+      setEdges((eds) => addEdge(connection, eds));
+    },
     [setEdges]
   );
 
@@ -293,10 +299,21 @@ function Flow({ boardId }: { boardId: string }) {
     [reactFlowInstance, project, setNodes, handleNodeUpdate, handleNodeDelete]
   );
 
-  // Initialize node data
-  useState(() => {
+  // Initialize node data and edges
+  useEffect(() => {
+    // First add data to nodes
     addNodeDataToNodes();
-  });
+
+    // Then set edges after a small delay to ensure nodes and handles are rendered
+    const timer = setTimeout(() => {
+      setEdges(initialEdges);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [addNodeDataToNodes, setEdges]);
+
+  // Memoize node types to prevent unnecessary re-renders
+  const memoizedNodeTypes = useMemo(() => nodeTypes, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -348,12 +365,13 @@ function Flow({ boardId }: { boardId: string }) {
         {/* React Flow Canvas */}
         <div ref={reactFlowWrapper} className="h-[calc(100vh-48px)]">
           <ReactFlow
+            key={`flow-${boardId}`}
             nodes={nodes}
             edges={edges}
             onNodesChange={handleNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
-            nodeTypes={nodeTypes}
+            nodeTypes={memoizedNodeTypes}
             onInit={setReactFlowInstance}
             fitView
             minZoom={0.1}
@@ -385,10 +403,15 @@ function Flow({ boardId }: { boardId: string }) {
   );
 }
 
+// Define the params type
+interface BoardParams {
+  id: string;
+}
+
 // Board component with React Flow Provider
-export default function Board({ params }: { params: { id: string } }) {
+export default function Board({ params }: { params: any }) {
   // Unwrap params using React.use()
-  const unwrappedParams = use(params);
+  const unwrappedParams = use(params) as BoardParams;
   const boardId = unwrappedParams.id;
 
   return (
