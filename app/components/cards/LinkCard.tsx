@@ -1,5 +1,6 @@
 import { memo, useEffect, useState } from "react";
 import { LinkIcon, AlertCircleIcon } from "lucide-react";
+import Image from "next/image";
 
 interface LinkCardProps {
   content: string;
@@ -128,11 +129,13 @@ function LinkCard({
             <div className="flex flex-col">
               <div className="flex items-start space-x-3">
                 {metadata.favicon && !faviconError ? (
-                  <img
+                  <Image
                     src={metadata.favicon}
                     alt=""
                     className="w-5 h-5 mt-0.5 flex-shrink-0 object-contain"
                     onError={handleFaviconError}
+                    width={20}
+                    height={20}
                   />
                 ) : (
                   <div className="w-5 h-5 bg-gray-100 rounded-sm flex items-center justify-center flex-shrink-0">
