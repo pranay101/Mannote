@@ -20,6 +20,7 @@ import ReactFlow, {
   ReactFlowProvider,
   NodeChange,
   EdgeTypes,
+  ReactFlowInstance,
 } from "reactflow";
 import "reactflow/dist/style.css";
 
@@ -165,7 +166,8 @@ function Flow({ boardId }: { boardId: string }) {
   // Initialize nodes first, without edges
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
+  const [reactFlowInstance, setReactFlowInstance] =
+    useState<ReactFlowInstance | null>(null);
   const { project } = useReactFlow();
 
   // Custom node change handler to prevent dragging active nodes
@@ -218,7 +220,17 @@ function Flow({ boardId }: { boardId: string }) {
 
   // Handle node update
   const handleNodeUpdate = useCallback(
-    (nodeId: string, updates: any) => {
+    (
+      nodeId: string,
+      updates: Partial<{
+        content: string;
+        details: string[];
+        type: string;
+        html?: string;
+        width?: number;
+        height?: number;
+      }>
+    ) => {
       setNodes((nds) =>
         nds.map((node) => {
           if (node.id === nodeId) {
@@ -451,11 +463,10 @@ function Flow({ boardId }: { boardId: string }) {
             >
               <div className="flex items-center space-x-4">
                 <span className="flex items-center">
-                  <span className="mr-2">👉</span>
-                  <span>
-                    Select a card and use the colored handles to create
-                    connections
+                  <span className="mr-2 flex items-center justify-center">
+                    <span className="w-3 h-3 rounded-full bg-white inline-block"></span>
                   </span>
+                  <span>Use the circular handles to connect cards</span>
                 </span>
                 <span>•</span>
                 <span className="flex items-center">
@@ -477,7 +488,7 @@ interface BoardParams {
 }
 
 // Board component with React Flow Provider
-export default function Board({ params }: { params: any }) {
+export default function Board({ params }: { params: Record<string, unknown> }) {
   // Unwrap params using React.use()
   const unwrappedParams = use(params) as BoardParams;
   const boardId = unwrappedParams.id;

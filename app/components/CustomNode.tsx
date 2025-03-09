@@ -328,7 +328,7 @@ function CustomNode({ id, data, selected }: NodeProps<CustomNodeData>) {
           : selected
           ? "shadow-md"
           : "shadow-sm"
-      } text-xs relative overflow-hidden`}
+      } text-xs relative overflow-visible`}
       onClick={handleCardClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}
@@ -402,14 +402,15 @@ function CustomNode({ id, data, selected }: NodeProps<CustomNodeData>) {
       {/* Right Handle */}
       <div className="absolute right-0 top-1/2 transform -translate-y-1/2 z-50">
         <div className="relative group">
-          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-2 text-indigo-600 text-lg font-bold animate-pulse">
-            →
+          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-2 flex items-center justify-center">
+            <div className="w-4 h-4 rounded-full bg-indigo-600 absolute opacity-50"></div>
+            <div className="w-3 h-3 rounded-full bg-indigo-600 relative"></div>
           </div>
           <Handle
             type="source"
             position={Position.Right}
             id="right"
-            className="w-10 h-10 rounded-md bg-indigo-500 opacity-80 hover:opacity-100 transition-opacity shadow-lg"
+            className="w-10 h-10 rounded-full bg-indigo-500 opacity-80 hover:opacity-100 transition-opacity shadow-lg"
             style={{ right: -5, border: "2px solid white" }}
           />
           <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-10 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
@@ -421,14 +422,15 @@ function CustomNode({ id, data, selected }: NodeProps<CustomNodeData>) {
       {/* Left Handle */}
       <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-50">
         <div className="relative group">
-          <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-2 text-blue-600 text-lg font-bold animate-pulse">
-            ←
+          <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-2 flex items-center justify-center">
+            <div className="w-4 h-4 rounded-full bg-blue-600 absolute opacity-50"></div>
+            <div className="w-3 h-3 rounded-full bg-blue-600 relative"></div>
           </div>
           <Handle
             type="target"
             position={Position.Left}
             id="left"
-            className="w-10 h-10 rounded-md bg-blue-500 opacity-80 hover:opacity-100 transition-opacity shadow-lg"
+            className="w-10 h-10 rounded-full bg-blue-500 opacity-80 hover:opacity-100 transition-opacity shadow-lg"
             style={{ left: -5, border: "2px solid white" }}
           />
           <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-10 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
@@ -440,30 +442,32 @@ function CustomNode({ id, data, selected }: NodeProps<CustomNodeData>) {
       {/* Top Handle */}
       <div className="absolute top-0 left-1/2 transform -translate-x-1/2 z-50">
         <div className="relative group">
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 text-indigo-600 text-lg font-bold animate-pulse">
-            ↑
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 flex items-center justify-center">
+            <div className="w-4 h-4 rounded-full bg-indigo-600 absolute opacity-50"></div>
+            <div className="w-3 h-3 rounded-full bg-indigo-600 relative"></div>
           </div>
           <Handle
             type="source"
             position={Position.Top}
             id="top"
-            className="w-10 h-10 rounded-md bg-indigo-500 opacity-80 hover:opacity-100 transition-opacity shadow-lg"
+            className="w-10 h-10 rounded-full bg-indigo-500 opacity-80 hover:opacity-100 transition-opacity shadow-lg"
             style={{ top: -5, border: "2px solid white" }}
           />
         </div>
       </div>
 
       {/* Bottom Handle */}
-      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-50">
-        <div className="relative group">
-          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-2 text-blue-600 text-lg font-bold animate-pulse">
-            ↓
+      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-50 overflow-visible">
+        <div className="relative group overflow-visible">
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-2 flex items-center justify-center">
+            <div className="w-4 h-4 rounded-full bg-blue-600 absolute opacity-50"></div>
+            <div className="w-3 h-3 rounded-full bg-blue-600 relative"></div>
           </div>
           <Handle
             type="target"
             position={Position.Bottom}
             id="bottom"
-            className="w-10 h-10 rounded-md bg-blue-500 opacity-80 hover:opacity-100 transition-opacity shadow-lg"
+            className="w-10 h-10 rounded-full bg-blue-500 opacity-80 hover:opacity-100 transition-opacity shadow-lg"
             style={{ bottom: -5, border: "2px solid white" }}
           />
         </div>
