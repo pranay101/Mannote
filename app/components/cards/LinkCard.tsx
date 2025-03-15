@@ -21,6 +21,8 @@ interface LinkCardProps {
       details: string[];
       type: string;
       html?: string;
+      width?: number;
+      height?: number;
     }>
   ) => void;
 }
@@ -49,6 +51,15 @@ function LinkCard({
   const [isEditing, setIsEditing] = useState(!details[0]);
   const inputRef = useRef<HTMLInputElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [cardHeight, setCardHeight] = useState<number | null>(null);
+
+  // Preserve the card dimensions when loading metadata
+  useEffect(() => {
+    if (cardRef.current && !isEditing && !loading && !cardHeight) {
+      setCardHeight(cardRef.current.offsetHeight);
+    }
+  }, [isEditing, loading, cardHeight]);
 
   const fetchLinkMetadata = useCallback(
     async (url: string) => {
@@ -63,6 +74,11 @@ function LinkCard({
         setLoading(true);
         setError(null);
         setFaviconError(false);
+
+        // Store current dimensions before loading
+        if (cardRef.current && !cardHeight) {
+          setCardHeight(cardRef.current.offsetHeight);
+        }
 
         const response = await fetch(
           `/api/link-metadata?url=${encodeURIComponent(url)}`,
@@ -85,6 +101,17 @@ function LinkCard({
         if (data.title && !content && onUpdate) {
           onUpdate(id, { content: data.title });
         }
+
+        // Update the node dimensions to maintain consistency
+        if (onUpdate && cardHeight) {
+          // Set a minimum height based on the content
+          const minHeight = data.image ? 250 : 150;
+          onUpdate(id, {
+            height: Math.max(cardHeight, minHeight),
+            // Ensure width is consistent
+            width: 288,
+          });
+        }
       } catch (err) {
         console.error("Error fetching link metadata:", err);
         setError(
@@ -94,7 +121,7 @@ function LinkCard({
         setLoading(false);
       }
     },
-    [content, id, onUpdate]
+    [content, id, onUpdate, cardHeight]
   );
 
   useEffect(() => {
@@ -132,6 +159,8 @@ function LinkCard({
   const handleUrlSubmit = () => {
     if (editableDetails[0]) {
       setIsEditing(false);
+      // Reset card height when submitting a new URL
+      setCardHeight(null);
       fetchLinkMetadata(editableDetails[0]);
     }
   };
@@ -162,6 +191,8 @@ function LinkCard({
 
   const handleEdit = () => {
     setIsEditing(true);
+    // Reset card height when editing
+    setCardHeight(null);
     setTimeout(() => {
       inputRef.current?.focus();
       inputRef.current?.select();
@@ -170,12 +201,21 @@ function LinkCard({
 
   const handleRetry = () => {
     if (details[0]) {
+      // Reset card height when retrying
+      setCardHeight(null);
       fetchLinkMetadata(details[0]);
     }
   };
 
   return (
-    <div className="bg-white flex flex-col rounded border border-gray-200 overflow-hidden transition-shadow duration-200 hover:shadow-sm">
+    <div
+      ref={cardRef}
+      className="bg-white flex flex-col rounded border border-gray-200 overflow-hidden transition-shadow duration-200 hover:shadow-sm group"
+      style={{
+        minHeight: cardHeight ? `${cardHeight}px` : undefined,
+        height: "100%",
+      }}
+    >
       {isEditing ? (
         <div className="p-3 space-y-3">
           <div className="flex items-center">
@@ -227,6 +267,8 @@ function LinkCard({
               </div>
               <div className="h-2 bg-gray-100 rounded w-full"></div>
               <div className="h-2 bg-gray-100 rounded w-2/3"></div>
+              {/* Add a placeholder for the image to maintain height */}
+              <div className="w-full h-[150px] bg-gray-100 rounded-t"></div>
             </div>
           )}
 
@@ -257,9 +299,9 @@ function LinkCard({
           )}
 
           {metadata && !loading && !error && (
-            <div className="flex flex-col">
+            <div className="flex flex-col h-full">
               {metadata.image && (
-                <div className="w-full h-[150px] overflow-hidden relative bg-gray-50">
+                <div className="w-full h-[150px] overflow-hidden relative bg-gray-50 rounded-t">
                   <Image
                     src={metadata.image}
                     alt=""
@@ -269,11 +311,12 @@ function LinkCard({
                     onError={() => {
                       /* Handle image error */
                     }}
+                    style={{ transformOrigin: "center center" }}
                   />
                 </div>
               )}
 
-              <div className="p-3 space-y-2">
+              <div className="p-3 space-y-2 flex-grow">
                 <div className="flex items-start space-x-3">
                   {metadata.favicon && !faviconError ? (
                     <Image
@@ -310,6 +353,7 @@ function LinkCard({
                         <ExternalLinkIcon className="h-3 w-3 mr-1" />
                         <span>Open</span>
                       </a>
+
                       <button
                         onClick={handleCopyLink}
                         className="text-xs text-gray-500 hover:text-gray-700 flex items-center transition-colors duration-200"
@@ -317,6 +361,7 @@ function LinkCard({
                         <ClipboardIcon className="h-3 w-3 mr-1" />
                         <span>{copied ? "Copied!" : "Copy"}</span>
                       </button>
+
                       <button
                         onClick={handleEdit}
                         className="text-xs text-gray-500 hover:text-gray-700 transition-colors duration-200"
