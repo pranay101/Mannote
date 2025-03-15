@@ -45,7 +45,10 @@ export async function PUT(
     const session = await getServerSession();
 
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return await NextResponse.json(
+        { error: "Unauthorized", boardId: params.boardId },
+        { status: 401 }
+      );
     }
 
     const { title, description, cards, edges } = await req.json();

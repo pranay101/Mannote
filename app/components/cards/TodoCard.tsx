@@ -457,7 +457,6 @@ function TodoCard({
       handleDetailUpdate,
       handleToggleItem,
       todoItems,
-      todoItems.length,
       editableDetails,
       onUpdate,
       id,

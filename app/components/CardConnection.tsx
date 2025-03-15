@@ -37,7 +37,6 @@ export default function CardConnection({
 
   // Calculate arrow head points
   const arrowLength = 10;
-  const arrowWidth = 6;
   const arrowAngle = Math.PI / 6; // 30 degrees
 
   const arrowPoint1X = endX - arrowLength * Math.cos(angle - arrowAngle);

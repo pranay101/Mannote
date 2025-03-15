@@ -1,16 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
 import {
-  ArrowLeft,
-  Github,
-  Twitter,
-  ExternalLink,
   ChevronDown,
   ChevronUp,
+  Github,
+  Twitter
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 
 // FAQ component for the About page
 const FAQItem = ({
@@ -103,7 +101,7 @@ export default function AboutPage() {
                 develop your thoughts.
               </p>
               <p>
-                Whether you're planning a project, collecting inspiration, or
+                Whether you&apos;re planning a project, collecting inspiration, or
                 organizing your thoughts, Mannote gives you the tools to think
                 visually and create connections between your ideas.
               </p>
@@ -277,7 +275,7 @@ export default function AboutPage() {
               question="Can I collaborate with others?"
               answer={
                 <p>
-                  Collaboration features are coming soon! You'll be able to
+                  Collaboration features are coming soon! You&apos;ll be able to
                   invite others to view and edit your boards.
                 </p>
               }
@@ -296,7 +294,7 @@ export default function AboutPage() {
               question="Can I export my boards?"
               answer={
                 <p>
-                  Export functionality is planned for a future update. You'll be
+                  Export functionality is planned for a future update. You&apos;ll be
                   able to export your boards as images or PDFs.
                 </p>
               }

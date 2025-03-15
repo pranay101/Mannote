@@ -1,5 +1,5 @@
-import { useRef, memo } from "react";
 import { ImageIcon } from "lucide-react";
+import { memo } from "react";
 
 interface ImageCardProps {
   content: string;
@@ -25,8 +25,6 @@ interface ImageCardProps {
 function ImageCard({
   content,
   details,
-  id,
-  onUpdate,
   handlePaste,
   handleImageUpload,
   handleFileChange,
@@ -35,6 +33,7 @@ function ImageCard({
   return (
     <div className="bg-white h-40 flex flex-col items-center justify-center">
       {details[0] ? (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={details[0]}
           alt={content}

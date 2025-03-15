@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
         throw new Error("Invalid URL protocol");
       }
     } catch (error) {
+      console.warn("Error validating URL:", error);
       return NextResponse.json(
         { error: "Invalid URL format" },
         { status: 400 }

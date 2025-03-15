@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { getServerSession } from "next-auth";
 import { createNewBoard } from "@/lib/models";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 
 // Helper function to check authentication
 async function checkAuth() {
@@ -16,7 +16,7 @@ async function checkAuth() {
 }
 
 // GET /api/boards - Get all boards for the current user
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     // Check authentication
     const user = await checkAuth();
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     // Check authentication
     const user = await checkAuth();
 
-    if (!user) {
+    if (!user || !user.email) {
       return NextResponse.json(
         { error: "Unauthorized: Please sign in to access this resource" },
         { status: 401 }
