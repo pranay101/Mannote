@@ -4,16 +4,12 @@ import { motion } from "framer-motion";
 import {
   ArrowRightIcon,
   FileTextIcon,
-  GithubIcon,
   ImageIcon,
-  InstagramIcon,
   LayoutGridIcon,
   LinkIcon,
   TextIcon,
-  TwitterIcon,
   UsersIcon,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
@@ -28,12 +24,7 @@ export default function Home() {
             transition={{ duration: 0.5 }}
             className="text-2xl font-bold bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent"
           >
-            <Image
-              src="/Mannotelogo.svg"
-              alt="Mannote"
-              width={32}
-              height={32}
-            />
+            <Link href="/">Mannnote</Link>
           </motion.span>
         </div>
         <div className="hidden md:flex items-center gap-8">
@@ -44,42 +35,18 @@ export default function Home() {
             Features
           </Link>
           <Link
-            href="#templates"
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://github.com/pranay101/Mannote"
             className="text-sm hover:text-indigo-600 transition-colors"
           >
-            Templates
-          </Link>
-          <Link
-            href="#pricing"
-            className="text-sm hover:text-indigo-600 transition-colors"
-          >
-            Pricing
+            GitHub
           </Link>
           <Link
             href="#about"
             className="text-sm hover:text-indigo-600 transition-colors"
           >
             About
-          </Link>
-          <Link
-            href="/dashboard"
-            className="text-sm hover:text-indigo-600 transition-colors"
-          >
-            Dashboard
-          </Link>
-        </div>
-        <div className="flex items-center gap-4">
-          <Link
-            href="/login"
-            className="text-sm hover:text-indigo-600 transition-colors"
-          >
-            Log in
-          </Link>
-          <Link
-            href="/dashboard"
-            className="text-sm bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md transition-colors"
-          >
-            Sign up free
           </Link>
         </div>
       </nav>
@@ -128,7 +95,7 @@ export default function Home() {
           </Link>
           <Link
             href="#demo"
-            className="glass border border-gray-200 hover:border-indigo-600 px-8 py-3 rounded-md text-lg transition-colors"
+            className="hidden glass border border-gray-200 hover:border-indigo-600 px-8 py-3 rounded-md text-lg transition-colors"
           >
             Watch demo
           </Link>
@@ -322,76 +289,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-20 px-6 md:px-12">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Loved by creative professionals
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              See what our users have to say about Mannote
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                quote:
-                  "Mannote has completely transformed how I organize my design projects. The visual boards make it so easy to see everything at a glance.",
-                author: "Sarah Johnson",
-                role: "UX Designer",
-                delay: 0.2,
-              },
-              {
-                quote:
-                  "As a content creator, I need a tool that helps me organize my ideas visually. Mannote is exactly what I&apos;ve been looking for.",
-                author: "Michael Chen",
-                role: "Content Strategist",
-                delay: 0.4,
-              },
-              {
-                quote:
-                  "Our team has been using Mannote for project planning and it's been a game-changer for our creative process.",
-                author: "Emily Rodriguez",
-                role: "Creative Director",
-                delay: 0.6,
-              },
-            ].map((testimonial, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: testimonial.delay }}
-                className="bg-white p-8 rounded-lg shadow-sm card-hover"
-              >
-                <p className="text-gray-600 mb-6 italic">
-                  &ldquo;{testimonial.quote}&rdquo;
-                </p>
-                <div className="flex items-center">
-                  <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
-                    <span className="text-indigo-600 font-semibold">
-                      {testimonial.author.charAt(0)}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="font-semibold">{testimonial.author}</p>
-                    <p className="text-sm text-gray-500">{testimonial.role}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="py-20 px-6 md:px-12 bg-indigo-600 text-white">
         <motion.div
@@ -419,184 +316,9 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="py-12 px-6 md:px-12 border-t border-gray-100">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
-          <div>
-            <h3 className="font-semibold mb-4">Product</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-indigo-600 transition-colors"
-                >
-                  Features
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-indigo-600 transition-colors"
-                >
-                  Templates
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-indigo-600 transition-colors"
-                >
-                  Integrations
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-indigo-600 transition-colors"
-                >
-                  Pricing
-                </Link>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-4">Resources</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-indigo-600 transition-colors"
-                >
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-indigo-600 transition-colors"
-                >
-                  Tutorials
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-indigo-600 transition-colors"
-                >
-                  Help Center
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-indigo-600 transition-colors"
-                >
-                  Community
-                </Link>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-4">Company</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-indigo-600 transition-colors"
-                >
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-indigo-600 transition-colors"
-                >
-                  Careers
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-indigo-600 transition-colors"
-                >
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-indigo-600 transition-colors"
-                >
-                  Press
-                </Link>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-4">Legal</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-indigo-600 transition-colors"
-                >
-                  Privacy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-indigo-600 transition-colors"
-                >
-                  Terms
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-indigo-600 transition-colors"
-                >
-                  Security
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-indigo-600 transition-colors"
-                >
-                  Cookies
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div className="max-w-7xl mx-auto mt-12 pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-sm text-gray-600 mb-4 md:mb-0">
-            © {new Date().getFullYear()} Mannote. All rights reserved.
-          </p>
-          <div className="flex space-x-6">
-            <Link
-              href="#"
-              className="text-gray-600 hover:text-indigo-600 transition-colors"
-            >
-              <span className="sr-only">Twitter</span>
-              <TwitterIcon className="h-6 w-6" />
-            </Link>
-            <Link
-              href="#"
-              className="text-gray-600 hover:text-indigo-600 transition-colors"
-            >
-              <span className="sr-only">GitHub</span>
-              <GithubIcon className="h-6 w-6" />
-            </Link>
-            <Link
-              href="#"
-              className="text-gray-600 hover:text-indigo-600 transition-colors"
-            >
-              <span className="sr-only">Instagram</span>
-              <InstagramIcon className="h-6 w-6" />
-            </Link>
-          </div>
-        </div>
+        <p className="text-sm text-gray-600 mb-4 md:mb-0 text-center">
+          © {new Date().getFullYear()} Mannote. All rights reserved.
+        </p>
       </footer>
     </div>
   );
