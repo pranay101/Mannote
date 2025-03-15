@@ -1,64 +1,59 @@
-"use client";
-
-import Link from "next/link";
 import {
   FileTextIcon,
   ImageIcon,
-  ListIcon,
   LinkIcon,
-  CheckSquareIcon,
-  TableIcon,
-  LayoutIcon,
-  PencilIcon,
-  UploadIcon,
-  MoreVerticalIcon,
+  ListIcon,
+  Trash2Icon,
 } from "lucide-react";
 
 interface BoardSidebarProps {
   onAddItem: (type: string) => void;
+  onDeleteAll: () => void;
 }
 
-export default function BoardSidebar({ onAddItem }: BoardSidebarProps) {
+export default function BoardSidebar({
+  onAddItem,
+  onDeleteAll,
+}: BoardSidebarProps) {
   const sidebarItems = [
-    { icon: <FileTextIcon size={20} />, label: "Note", type: "note" },
-    { icon: <ImageIcon size={20} />, label: "Image", type: "image" },
-    { icon: <ListIcon size={20} />, label: "To-do", type: "todo" },
-    { icon: <LinkIcon size={20} />, label: "Link", type: "link" },
-    { icon: <CheckSquareIcon size={20} />, label: "Board", type: "board" },
-    { icon: <TableIcon size={20} />, label: "Table", type: "table" },
-    { icon: <LayoutIcon size={20} />, label: "Column", type: "column" },
-    { icon: <PencilIcon size={20} />, label: "Draw", type: "draw" },
-    { icon: <UploadIcon size={20} />, label: "Upload", type: "upload" },
+    { icon: <FileTextIcon size={16} />, label: "Note", type: "note" },
+    { icon: <LinkIcon size={16} />, label: "Link", type: "link" },
+    { icon: <ListIcon size={16} />, label: "To-do", type: "todo" },
+    { icon: <ImageIcon size={16} />, label: "Image", type: "image" },
+    ,
   ];
 
   return (
-    <div className="fixed left-0 top-0 bottom-0 w-16 bg-white border-r border-gray-200 flex flex-col items-center py-4 z-10">
-      <Link href="/dashboard" className="mb-6">
-        <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
-          M
-        </div>
-      </Link>
-
-      <div className="flex-1 flex flex-col items-center space-y-4">
-        {sidebarItems.map((item, index) => (
-          <button
-            key={index}
-            className="w-10 h-10 rounded-md flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors"
-            onClick={() => onAddItem(item.type)}
-            title={item.label}
-          >
-            {item.icon}
-          </button>
-        ))}
+    <div className="fixed left-0 top-0 bottom-0 w-14 bg-white border-r border-gray-200 flex flex-col items-center py-4 shadow-sm z-10">
+      <div className="flex-1 flex flex-col items-center w-full space-y-3 mt-2">
+        {sidebarItems.map(
+          (item, index) =>
+            item && (
+              <button
+                key={index}
+                className="w-full px-2 py-1.5 flex flex-col items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors text-xs"
+                onClick={() => onAddItem(item.type)}
+                title={item.label}
+              >
+                <div className="mb-1">{item.icon}</div>
+                <span className="text-[9px] font-medium text-gray-500">
+                  {item.label}
+                </span>
+              </button>
+            )
+        )}
       </div>
 
-      <div className="mt-auto flex flex-col items-center space-y-4 mb-4">
-        <button className="w-10 h-10 rounded-md flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors">
-          <MoreVerticalIcon size={20} />
+      <div className="mt-auto mb-4">
+        <button
+          onClick={onDeleteAll}
+          className="w-full px-2 py-1.5 flex flex-col items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors text-xs"
+        >
+          <div className="mb-1">
+            <Trash2Icon size={16} />
+          </div>
+          <span className="text-[9px] font-medium text-gray-500">Trash</span>
         </button>
-        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700">
-          U
-        </div>
       </div>
     </div>
   );

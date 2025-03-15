@@ -1,35 +1,33 @@
-"use client";
-
-import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
-  MoreHorizontalIcon,
+  CheckIcon,
+  EditIcon,
   ImageIcon,
   LinkIcon,
-  ListIcon,
-  CheckIcon,
+  MoreHorizontalIcon,
   PlusIcon,
-  XIcon,
   TrashIcon,
-  EditIcon,
+  XIcon,
 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import LinkCard from "./cards/LinkCard";
 
 interface BoardCardProps {
-  id: number;
+  id: string;
   type: string;
   content: string;
   details: string[];
   position: { x: number; y: number };
   isActive: boolean;
   isDragging: boolean;
-  onDragStart: (e: React.MouseEvent, id: number) => void;
+  onDragStart: (e: React.MouseEvent, id: string) => void;
   onUpdate?: (
-    id: number,
+    id: string,
     updates: Partial<{ content: string; details: string[]; type: string }>
   ) => void;
-  onDelete?: (id: number) => void;
-  connectionStartHandler?: (id: number) => void;
-  connectionEndHandler?: (id: number) => void;
+  onDelete?: (id: string) => void;
+  connectionStartHandler?: (id: string) => void;
+  connectionEndHandler?: (id: string) => void;
   isConnectionMode?: boolean;
 }
 
@@ -120,6 +118,7 @@ export default function BoardCard({
         return (
           <div className="bg-gray-200 h-40 rounded flex flex-col items-center justify-center">
             {details[0] ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={details[0]}
                 alt={content}
@@ -181,46 +180,13 @@ export default function BoardCard({
         );
       case "link":
         return (
-          <div className="bg-blue-50 p-3 rounded flex flex-col">
-            {details[0] && !isEditing ? (
-              <a
-                href={details[0]}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 underline flex items-center"
-              >
-                <LinkIcon className="h-5 w-5 text-blue-500 mr-2 flex-shrink-0" />
-                <span>{content}</span>
-              </a>
-            ) : (
-              <div className="space-y-3">
-                <div className="flex items-center">
-                  <LinkIcon className="h-5 w-5 text-blue-500 mr-2 flex-shrink-0" />
-                  <input
-                    type="text"
-                    value={editableContent}
-                    onChange={(e) => setEditableContent(e.target.value)}
-                    onBlur={handleContentUpdate}
-                    placeholder="Link title"
-                    className="flex-1 text-sm text-gray-600 bg-transparent border-b border-gray-300 focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-                <input
-                  type="url"
-                  value={details[0] || ""}
-                  onChange={(e) => {
-                    const newDetails = [e.target.value];
-                    setEditableDetails(newDetails);
-                    if (onUpdate) {
-                      onUpdate(id, { details: newDetails });
-                    }
-                  }}
-                  placeholder="https://example.com"
-                  className="w-full text-sm text-blue-600 bg-transparent border-b border-gray-300 focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-            )}
-          </div>
+          <LinkCard
+            content={content}
+            details={details}
+            id={id}
+            editableDetails={editableDetails}
+            setEditableDetails={setEditableDetails}
+          />
         );
       case "todo":
         return (
@@ -393,22 +359,39 @@ export default function BoardCard({
 
           {/* Card Menu */}
           {showMenu && (
-            <div className="absolute right-0 mt-1 w-36 bg-white rounded-md shadow-lg z-50 py-1">
+            <div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg z-50 py-1 border border-gray-200 animate-fadeIn">
               <button
-                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-indigo-600 flex items-center transition-colors duration-150"
                 onClick={() => {
                   setIsEditing(!isEditing);
                   setShowMenu(false);
                 }}
               >
                 <EditIcon className="h-4 w-4 mr-2" />
-                {isEditing ? "Done Editing" : "Edit Card"}
+                {isEditing ? "Save Changes" : "Edit Card"}
               </button>
+              {type === "note" && (
+                <button
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-indigo-600 flex items-center transition-colors duration-150"
+                  onClick={() => {
+                    // Add functionality to convert note to another type
+                    setShowMenu(false);
+                  }}
+                >
+                  <LinkIcon className="h-4 w-4 mr-2" />
+                  Convert to Link
+                </button>
+              )}
               <button
-                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center"
-                onClick={() => onDelete && onDelete(id)}
+                className="w-full text-left text-sm text-red-600 hover:bg-red-50 flex items-center transition-colors duration-150"
+                onClick={() => {
+                  if (onDelete) {
+                    onDelete(id);
+                  }
+                  setShowMenu(false);
+                }}
               >
-                <TrashIcon className="h-4 w-4 mr-2" />
+                <TrashIcon className="h-6 w-6 mr-2" />
                 Delete Card
               </button>
             </div>

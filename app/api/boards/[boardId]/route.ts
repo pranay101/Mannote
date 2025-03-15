@@ -48,11 +48,12 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { title, description, cards } = await req.json();
+    const { title, description, cards, edges } = await req.json();
 
     const client = await clientPromise;
     const db = client.db();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = {
       updatedAt: new Date(),
     };
@@ -60,6 +61,7 @@ export async function PUT(
     if (title !== undefined) updateData.title = title;
     if (description !== undefined) updateData.description = description;
     if (cards !== undefined) updateData.cards = cards;
+    if (edges !== undefined) updateData.edges = edges;
 
     const result = await db
       .collection("boards")

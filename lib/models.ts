@@ -12,11 +12,21 @@ export interface Card {
   updatedAt: Date;
 }
 
+export interface Edge {
+  id: string;
+  source: string;
+  target: string;
+  sourceHandle?: string;
+  targetHandle?: string;
+  label?: string;
+}
+
 export interface Board {
   id: string;
   title: string;
   description?: string;
   cards: Card[];
+  edges?: Edge[];
   createdAt: Date;
   updatedAt: Date;
   userId: string;
@@ -32,6 +42,7 @@ export function createNewBoard(
     title,
     description,
     cards: [],
+    edges: [],
     createdAt: new Date(),
     updatedAt: new Date(),
     userId,

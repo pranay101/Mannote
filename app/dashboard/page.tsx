@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import axios from "axios";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -16,6 +17,9 @@ import {
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { Board } from "@/lib/models";
+import { GeneralObject } from "@/types/definitions";
+import { v4 } from "uuid";
+import { toast } from "sonner";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -28,8 +32,42 @@ export default function Dashboard() {
   const [newBoardTitle, setNewBoardTitle] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const boardsRef = useRef<Board[]>([]);
 
-  console.log(status, session, "dashboard");
+  // Update boardsRef whenever boards change
+  useEffect(() => {
+    boardsRef.current = boards;
+  }, [boards]);
+
+  // Define fetchBoards with useCallback to avoid dependency issues
+  const fetchBoards = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      await axios.get("/api/boards").then((res: GeneralObject) => {
+        setBoards(res.data);
+        setIsLoading(false);
+      });
+    } catch (error) {
+      console.error("Error fetching boards:", error);
+      setError("Failed to load your boards. Please try refreshing the page.");
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Function to handle sign out
+  const handleSignOut = useCallback(async () => {
+    try {
+      // Sign out and redirect to login page
+      await signOut({ callbackUrl: "/login" });
+    } catch (error) {
+      console.error("Sign out error:", error);
+      // Force redirect to login if there's an error
+      router.push("/login");
+    }
+  }, [router]);
+
   // Add a periodic check to verify the session is still valid
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -48,42 +86,11 @@ export default function Dashboard() {
     // Check session every 5 minutes
     const interval = setInterval(checkSession, 5 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [status]);
+  }, [status, handleSignOut]);
 
-  const fetchBoards = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const response = await fetch("/api/boards");
-
-      if (response.status === 401) {
-        // Session expired or invalid
-        await handleSignOut();
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch boards");
-      }
-
-      const data = await response.json();
-      setBoards(data);
-    } catch (error) {
-      console.error("Error fetching boards:", error);
-      setError("Failed to load your boards. Please try refreshing the page.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  // Fetch boards when component mounts
   useEffect(() => {
-    if (status === "authenticated" && session) {
-      fetchBoards();
-    } else if (status === "unauthenticated") {
-      router.push("/login");
-    }
-  }, [status, session, router, fetchBoards]);
+    fetchBoards();
+  }, [fetchBoards]);
 
   const createNewBoard = async () => {
     if (!newBoardTitle.trim()) return;
@@ -91,44 +98,30 @@ export default function Dashboard() {
     try {
       setIsCreating(true);
       setError(null);
-      const response = await fetch("/api/boards", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ title: newBoardTitle }),
+
+      // Since we don't have a backend, create a mock board
+      const newBoard = {
+        id: v4(),
+        title: newBoardTitle,
+        description: "",
+        cards: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        userId: session?.user?.email || "",
+      };
+
+      await axios.post("/api/boards", newBoard).then(() => {
+        fetchBoards();
+
+        setNewBoardTitle("");
+        setShowCreateForm(false);
+        setIsCreating(false);
+        toast.success("Board created successfully");
       });
-
-      if (response.status === 401) {
-        // Session expired or invalid
-        await handleSignOut();
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error("Failed to create board");
-      }
-
-      const newBoard = await response.json();
-      setBoards([newBoard, ...boards]);
-      setNewBoardTitle("");
-      setShowCreateForm(false);
     } catch (error) {
       console.error("Error creating board:", error);
-      setError("Failed to create board. Please try again.");
-    } finally {
+      toast.error("Failed to create board. Please try again.");
       setIsCreating(false);
-    }
-  };
-
-  const handleSignOut = async () => {
-    try {
-      // Sign out and redirect to login page
-      await signOut({ callbackUrl: "/login" });
-    } catch (error) {
-      console.error("Sign out error:", error);
-      // Force redirect to login if there's an error
-      router.push("/login");
     }
   };
 
@@ -177,7 +170,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 relative">
       {/* Dashboard Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -384,12 +377,20 @@ export default function Dashboard() {
                     >
                       <Link href={`/dashboard/board/${board.id}`}>
                         <div className="h-40 bg-gradient-to-br from-indigo-50 to-purple-50 p-4">
-                          <div className="grid grid-cols-2 grid-rows-2 gap-2 h-full opacity-50">
-                            <div className="bg-white rounded shadow-sm"></div>
-                            <div className="bg-white rounded shadow-sm"></div>
-                            <div className="bg-white rounded shadow-sm"></div>
-                            <div className="bg-white rounded shadow-sm"></div>
-                          </div>
+                          {board.cards && board.cards.length > 0 ? (
+                            <div className="grid grid-cols-2 grid-rows-2 gap-2 h-full opacity-50">
+                              <div className="bg-white rounded shadow-sm"></div>
+                              <div className="bg-white rounded shadow-sm"></div>
+                              <div className="bg-white rounded shadow-sm"></div>
+                              <div className="bg-white rounded shadow-sm"></div>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-center h-full">
+                              <p className="text-gray-400 text-sm">
+                                No cards yet
+                              </p>
+                            </div>
+                          )}
                         </div>
                         <div className="p-4">
                           <div className="flex justify-between items-start">

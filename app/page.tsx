@@ -1,21 +1,20 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import {
-  LayoutGridIcon,
-  FileTextIcon,
-  UsersIcon,
-  ImageIcon,
-  TextIcon,
-  LinkIcon,
   ArrowRightIcon,
-  CheckIcon,
+  FileTextIcon,
   GithubIcon,
-  TwitterIcon,
+  ImageIcon,
   InstagramIcon,
+  LayoutGridIcon,
+  LinkIcon,
+  TextIcon,
+  TwitterIcon,
+  UsersIcon,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -323,73 +322,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Templates Section */}
-      <section id="templates" className="py-20 px-6 md:px-12 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Start with a template
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Get started quickly with professionally designed templates for any
-              project
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                title: "Project Planning",
-                description: "Organize tasks, timelines, and resources",
-                color: "from-blue-500 to-indigo-600",
-                delay: 0.2,
-              },
-              {
-                title: "Mood Boards",
-                description: "Collect visual inspiration for your projects",
-                color: "from-purple-500 to-pink-600",
-                delay: 0.4,
-              },
-              {
-                title: "Content Calendar",
-                description: "Plan and schedule your content strategy",
-                color: "from-green-500 to-teal-600",
-                delay: 0.6,
-              },
-            ].map((template, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: template.delay }}
-                className="group relative rounded-lg overflow-hidden shadow-md h-64 cursor-pointer card-hover"
-              >
-                <div
-                  className={`absolute inset-0 bg-gradient-to-br ${template.color} opacity-90 group-hover:opacity-100 transition-opacity`}
-                ></div>
-                <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
-                  <h3 className="text-xl font-semibold mb-2">
-                    {template.title}
-                  </h3>
-                  <p className="text-white/80 mb-4">{template.description}</p>
-                  <span className="inline-flex items-center text-sm font-medium">
-                    Use template
-                    <ArrowRightIcon className="h-4 w-4 ml-1" />
-                  </span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Testimonials Section */}
       <section className="py-20 px-6 md:px-12">
         <div className="max-w-7xl mx-auto">
@@ -454,121 +386,6 @@ export default function Home() {
                     <p className="text-sm text-gray-500">{testimonial.role}</p>
                   </div>
                 </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section id="pricing" className="py-20 px-6 md:px-12 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Simple, transparent pricing
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Choose the plan that&apos;s right for you
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Free",
-                price: "$0",
-                description: "Perfect for individuals just getting started",
-                features: [
-                  "Up to 3 boards",
-                  "Basic templates",
-                  "1GB storage",
-                  "Personal use only",
-                ],
-                cta: "Get started",
-                popular: false,
-                delay: 0.2,
-              },
-              {
-                name: "Pro",
-                price: "$12",
-                period: "/month",
-                description: "Everything you need for serious projects",
-                features: [
-                  "Unlimited boards",
-                  "All templates",
-                  "10GB storage",
-                  "Collaboration with up to 5 users",
-                  "Priority support",
-                ],
-                cta: "Start free trial",
-                popular: true,
-                delay: 0.4,
-              },
-              {
-                name: "Team",
-                price: "$49",
-                period: "/month",
-                description: "For teams that need to collaborate extensively",
-                features: [
-                  "Unlimited boards",
-                  "All templates",
-                  "100GB storage",
-                  "Unlimited team members",
-                  "Advanced permissions",
-                  "24/7 support",
-                ],
-                cta: "Contact sales",
-                popular: false,
-                delay: 0.6,
-              },
-            ].map((plan, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: plan.delay }}
-                className={`bg-white p-8 rounded-lg shadow-sm ${
-                  plan.popular ? "ring-2 ring-indigo-600 relative" : ""
-                } card-hover`}
-              >
-                {plan.popular && (
-                  <div className="absolute top-0 right-0 bg-indigo-600 text-white text-xs font-semibold px-3 py-1 rounded-bl-lg rounded-tr-lg">
-                    Popular
-                  </div>
-                )}
-                <h3 className="text-xl font-semibold mb-2">{plan.name}</h3>
-                <div className="flex items-end mb-4">
-                  <span className="text-4xl font-bold">{plan.price}</span>
-                  {plan.period && (
-                    <span className="text-gray-500 ml-1">{plan.period}</span>
-                  )}
-                </div>
-                <p className="text-gray-600 mb-6">{plan.description}</p>
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-start">
-                      <CheckIcon className="h-5 w-5 text-indigo-600 mr-2 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-600">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="#"
-                  className={`block text-center py-2 px-4 rounded-md transition-colors ${
-                    plan.popular
-                      ? "bg-indigo-600 hover:bg-indigo-700 text-white"
-                      : "border border-gray-300 hover:border-indigo-600 text-gray-800"
-                  }`}
-                >
-                  {plan.cta}
-                </Link>
               </motion.div>
             ))}
           </div>
