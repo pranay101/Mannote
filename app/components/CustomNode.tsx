@@ -273,6 +273,8 @@ function CustomNode({ id, data, selected }: NodeProps<CustomNodeData>) {
             handleDetailUpdate={handleDetailUpdate}
             handleRemoveDetail={handleRemoveDetail}
             handleKeyDown={handleKeyDown}
+            onUpdate={data.onUpdate}
+            id={id}
           />
         );
       default: // note type

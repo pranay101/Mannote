@@ -3,7 +3,7 @@ const isValidURL = (url: string): boolean => {
     new URL(url);
     return true;
   } catch (err: unknown) {
-    console.error(err);
+    console.warn(err);
     return false;
   }
 };

@@ -15,6 +15,16 @@ interface TodoCardProps {
   handleDetailUpdate: (index: number, value: string) => void;
   handleRemoveDetail: (index: number) => void;
   handleKeyDown: (e: React.KeyboardEvent) => void;
+  onUpdate?: (
+    id: string,
+    updates: Partial<{
+      content: string;
+      details: string[];
+      type: string;
+      html?: string;
+    }>
+  ) => void;
+  id: string;
 }
 
 function TodoCard({
@@ -24,6 +34,8 @@ function TodoCard({
   handleDetailUpdate,
   handleRemoveDetail,
   handleKeyDown,
+  onUpdate,
+  id,
 }: TodoCardProps) {
   // Add a ref to track if we're currently updating from parent
   const isUpdatingFromParent = useRef(false);
@@ -128,52 +140,82 @@ function TodoCard({
       // Set flag to prevent the other useEffect from running
       isUpdatingFromParent.current = true;
 
-      // Batch all updates to avoid multiple re-renders
-      const batchedUpdates = () => {
-        // First handle additions and updates
-        newDetails.forEach((detail, index) => {
-          if (index < editableDetails.length) {
-            if (detail !== editableDetails[index]) {
-              handleDetailUpdate(index, detail);
-            }
-          } else {
-            // This is a new item that needs to be added
-            // We'll add it at the end
-            handleDetailUpdate(editableDetails.length, detail);
-          }
-        });
+      // Instead of updating each item individually, update the entire array at once
+      // This helps maintain edge connections
+      if (onUpdate && typeof onUpdate === "function") {
+        try {
+          // Use the onUpdate function if available (this preserves edges)
+          onUpdate(id, { details: newDetails });
+        } catch (error) {
+          console.error("Error updating details:", error);
 
-        // Then handle removals (if any)
-        // We need to remove from the end to avoid index shifting issues
-        for (let i = editableDetails.length - 1; i >= newDetails.length; i--) {
-          handleRemoveDetail(i);
+          // Fallback to individual updates if onUpdate fails
+          batchedUpdates();
         }
-      };
-
-      // Execute all updates
-      batchedUpdates();
+      } else {
+        // Fallback to individual updates if onUpdate is not available
+        batchedUpdates();
+      }
 
       // Update the ref with the new details
       prevEditableDetailsRef.current = [...newDetails];
     }
-  }, [todoItems, handleDetailUpdate, handleRemoveDetail, editableDetails]);
+
+    // Batch all updates function (used as fallback)
+    function batchedUpdates() {
+      // First handle additions and updates
+      newDetails.forEach((detail, index) => {
+        if (index < editableDetails.length) {
+          if (detail !== editableDetails[index]) {
+            handleDetailUpdate(index, detail);
+          }
+        } else {
+          // This is a new item that needs to be added
+          // We'll add it at the end
+          handleDetailUpdate(editableDetails.length, detail);
+        }
+      });
+
+      // Then handle removals (if any)
+      // We need to remove from the end to avoid index shifting issues
+      for (let i = editableDetails.length - 1; i >= newDetails.length; i--) {
+        handleRemoveDetail(i);
+      }
+    }
+  }, [
+    todoItems,
+    handleDetailUpdate,
+    handleRemoveDetail,
+    editableDetails,
+    onUpdate,
+    id,
+  ]);
 
   // Handle adding a new todo item
   const handleAddItem = useCallback(() => {
     if (newItem.trim()) {
       // Add directly to editableDetails to avoid sync issues
       const newItemText = newItem.trim();
-      handleDetailUpdate(editableDetails.length, newItemText);
 
-      // Also update our local state to avoid waiting for the sync
-      setTodoItems((prev) => [
-        ...prev,
-        {
-          id: `todo-${prev.length}-${Date.now()}`,
-          text: newItemText,
-          completed: false,
-        },
-      ]);
+      // Update our local state first to avoid waiting for the sync
+      setTodoItems((prev) => {
+        const newItems = [
+          ...prev,
+          {
+            id: `todo-${prev.length}-${Date.now()}`,
+            text: newItemText,
+            completed: false,
+          },
+        ];
+
+        // Update the ref to prevent unnecessary sync
+        prevTodoItemsRef.current = newItems;
+
+        return newItems;
+      });
+
+      // Then update parent state
+      handleDetailUpdate(editableDetails.length, newItemText);
 
       // Clear the input
       setNewItem("");
@@ -184,50 +226,92 @@ function TodoCard({
   const handleToggleItem = useCallback(
     (index: number) => {
       // Update our local state
-      setTodoItems((prev) =>
-        prev.map((item, i) =>
+      setTodoItems((prev) => {
+        const newItems = prev.map((item, i) =>
           i === index ? { ...item, completed: !item.completed } : item
-        )
-      );
+        );
 
-      // Update parent state - we need to toggle the completed state in editableDetails
-      const currentItem = editableDetails[index];
-      const isCurrentlyCompleted =
-        currentItem.startsWith("[x]") || currentItem.startsWith("✓");
+        // Update the ref to prevent unnecessary sync
+        prevTodoItemsRef.current = newItems;
 
-      if (isCurrentlyCompleted) {
-        // Remove the completion marker
-        const newText = currentItem.replace(/^\[x\]\s*|^✓\s*/, "").trim();
-        handleDetailUpdate(index, newText);
+        return newItems;
+      });
+
+      // Use onUpdate if available to preserve edge connections
+      if (onUpdate) {
+        const newDetails = todoItems.map((item, i) => {
+          if (i === index) {
+            // Toggle the completion state
+            return item.completed
+              ? item.text // Remove the completion marker
+              : `[x] ${item.text}`; // Add the completion marker
+          }
+          return item.completed ? `[x] ${item.text}` : item.text;
+        });
+
+        onUpdate(id, { details: newDetails });
       } else {
-        // Add the completion marker
-        handleDetailUpdate(index, `[x] ${currentItem}`);
+        // Fallback to individual update
+        // Update parent state - we need to toggle the completed state in editableDetails
+        const currentItem = editableDetails[index];
+        const isCurrentlyCompleted =
+          currentItem.startsWith("[x]") || currentItem.startsWith("✓");
+
+        if (isCurrentlyCompleted) {
+          // Remove the completion marker
+          const newText = currentItem.replace(/^\[x\]\s*|^✓\s*/, "").trim();
+          handleDetailUpdate(index, newText);
+        } else {
+          // Add the completion marker
+          handleDetailUpdate(index, `[x] ${currentItem}`);
+        }
       }
     },
-    [editableDetails, handleDetailUpdate]
+    [todoItems, editableDetails, handleDetailUpdate, onUpdate, id]
   );
 
   // Handle updating a todo item's text
   const handleUpdateItemText = useCallback(
     (index: number, text: string) => {
       // Update our local state
-      setTodoItems((prev) =>
-        prev.map((item, i) => (i === index ? { ...item, text } : item))
-      );
+      setTodoItems((prev) => {
+        const newItems = prev.map((item, i) =>
+          i === index ? { ...item, text } : item
+        );
 
-      // Update parent state - we need to preserve the completion state
-      const currentItem = editableDetails[index];
-      const isCompleted =
-        currentItem.startsWith("[x]") || currentItem.startsWith("✓");
+        // Update the ref to prevent unnecessary sync
+        prevTodoItemsRef.current = newItems;
 
-      // Update with the new text while preserving completion state
-      if (isCompleted) {
-        handleDetailUpdate(index, `[x] ${text}`);
+        return newItems;
+      });
+
+      // Use onUpdate if available to preserve edge connections
+      if (onUpdate) {
+        const newDetails = todoItems.map((item, i) => {
+          if (i === index) {
+            // Update the text while preserving completion state
+            return item.completed ? `[x] ${text}` : text;
+          }
+          return item.completed ? `[x] ${item.text}` : item.text;
+        });
+
+        onUpdate(id, { details: newDetails });
       } else {
-        handleDetailUpdate(index, text);
+        // Fallback to individual update
+        // Update parent state - we need to preserve the completion state
+        const currentItem = editableDetails[index];
+        const isCompleted =
+          currentItem.startsWith("[x]") || currentItem.startsWith("✓");
+
+        // Update with the new text while preserving completion state
+        if (isCompleted) {
+          handleDetailUpdate(index, `[x] ${text}`);
+        } else {
+          handleDetailUpdate(index, text);
+        }
       }
     },
-    [editableDetails, handleDetailUpdate]
+    [todoItems, editableDetails, handleDetailUpdate, onUpdate, id]
   );
 
   // Handle removing a todo item
@@ -276,14 +360,31 @@ function TodoCard({
           return newItems;
         });
 
-        // Update parent state - we need to handle this carefully to maintain indices
-        // First, update all items after the current index to shift them down
-        for (let i = editableDetails.length - 1; i > index; i--) {
-          handleDetailUpdate(i + 1, editableDetails[i]);
-        }
+        // Use onUpdate if available to preserve edge connections
+        if (onUpdate) {
+          // Convert the updated todoItems to string format
+          const newDetails = [
+            ...todoItems
+              .slice(0, index + 1)
+              .map((item) => (item.completed ? `[x] ${item.text}` : item.text)),
+            "", // New empty item
+            ...todoItems
+              .slice(index + 1)
+              .map((item) => (item.completed ? `[x] ${item.text}` : item.text)),
+          ];
 
-        // Then insert the new empty item
-        handleDetailUpdate(index + 1, "");
+          onUpdate(id, { details: newDetails });
+        } else {
+          // Fallback to individual updates
+          // Update parent state - we need to handle this carefully to maintain indices
+          // First, update all items after the current index to shift them down
+          for (let i = editableDetails.length - 1; i > index; i--) {
+            handleDetailUpdate(i + 1, editableDetails[i]);
+          }
+
+          // Then insert the new empty item
+          handleDetailUpdate(index + 1, "");
+        }
 
         // Focus the new item after render
         setTimeout(() => {
@@ -308,8 +409,17 @@ function TodoCard({
           return newItems;
         });
 
-        // Remove from parent state
-        handleRemoveDetail(index);
+        // Use onUpdate if available to preserve edge connections
+        if (onUpdate) {
+          const newDetails = todoItems
+            .filter((_, i) => i !== index)
+            .map((item) => (item.completed ? `[x] ${item.text}` : item.text));
+
+          onUpdate(id, { details: newDetails });
+        } else {
+          // Fallback to individual removal
+          handleRemoveDetail(index);
+        }
 
         // Focus the previous item if it exists
         setTimeout(() => {
@@ -346,8 +456,11 @@ function TodoCard({
       handleRemoveDetail,
       handleDetailUpdate,
       handleToggleItem,
+      todoItems,
       todoItems.length,
       editableDetails,
+      onUpdate,
+      id,
     ]
   );
 
