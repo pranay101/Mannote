@@ -28,7 +28,7 @@ import CustomNode from "@/app/components/CustomNode";
 import type { Board } from "@/types/definitions";
 import { GeneralObject } from "@/types/definitions";
 import axios from "axios";
-import { ArrowLeftIcon, LoaderIcon, SaveIcon, XIcon } from "lucide-react";
+import { ArrowLeftIcon, InfoIcon, LoaderIcon, SaveIcon, XIcon } from "lucide-react";
 import moment from "moment";
 import { toast } from "sonner";
 import { v4 } from "uuid";
@@ -63,6 +63,7 @@ function Flow({ boardId }: { boardId: string }) {
     database: string;
     localStorage: string;
   } | null>(null);
+  const [showSaveTooltip, setShowSaveTooltip] = useState(false);
 
   const { data: session } = useSession();
 
@@ -429,7 +430,8 @@ function Flow({ boardId }: { boardId: string }) {
                 </h1>
               </div>
               <div className="flex items-center space-x-3">
-                <div className="flex text-sm text-gray-600 gap-4">
+                {/* Last saved info - hidden on small screens, shown with tooltip */}
+                <div className="hidden md:flex text-sm text-gray-600 gap-4">
                   <h6>Last Saved</h6>
 
                   <div className="flex items-center gap-2">
@@ -446,6 +448,39 @@ function Flow({ boardId }: { boardId: string }) {
                         : "Never"}
                     </span>
                   </div>
+                </div>
+                
+                {/* Info icon for small screens */}
+                <div className="md:hidden relative">
+                  <button 
+                    className="text-gray-500 hover:text-gray-700"
+                    onMouseEnter={() => setShowSaveTooltip(true)}
+                    onMouseLeave={() => setShowSaveTooltip(false)}
+                    onClick={() => setShowSaveTooltip(!showSaveTooltip)}
+                  >
+                    <InfoIcon className="h-4 w-4" />
+                  </button>
+                  
+                  {/* Tooltip panel - column layout on mobile */}
+                  {showSaveTooltip && (
+                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg p-3 text-xs z-50 border border-gray-200">
+                      <h6 className="font-semibold mb-1">Last Saved</h6>
+                      <div className="flex flex-col space-y-2">
+                        <div>
+                          <strong>Local Storage: </strong>
+                          {lastSaved?.localStorage
+                            ? moment(lastSaved.localStorage).format("h:mm A, MMM D")
+                            : "Never"}
+                        </div>
+                        <div>
+                          <strong>Database: </strong>
+                          {lastSaved?.database
+                            ? moment(lastSaved.database).format("h:mm A, MMM D")
+                            : "Never"}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex space-x-2">
@@ -501,16 +536,17 @@ function Flow({ boardId }: { boardId: string }) {
             selectNodesOnDrag={false}
             panOnDrag={[1, 2]} // Only pan when middle or right mouse button is used
             className="text-selectable-flow"
+            
           >
             <Controls />
-            <MiniMap />
+            <MiniMap className="hidden md:block" />
             <Background color="#aaa" gap={16} />
 
             {/* Helper message with dismiss button */}
             {showHelperText && (
               <Panel
                 position="bottom-center"
-                className="bg-indigo-500/80 backdrop-blur-sm p-3 rounded-md shadow-md mb-4 text-xs text-white font-medium transition-opacity duration-300"
+                className="hidden md:block bg-indigo-500/80 backdrop-blur-sm p-3 rounded-md shadow-md mb-4 text-xs text-white font-medium transition-opacity duration-300"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
