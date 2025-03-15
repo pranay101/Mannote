@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-export default function LoginPage() {
+// Component to handle search params
+function LoginContent() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [isLoading, setIsLoading] = useState(false);
@@ -170,5 +171,22 @@ export default function LoginPage() {
         </div>
       </motion.div>
     </div>
+  );
+}
+
+// Loading fallback for Suspense
+function LoginFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginFallback />}>
+      <LoginContent />
+    </Suspense>
   );
 }
