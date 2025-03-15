@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import LinkCard from "./cards/LinkCard";
+import TodoCard from "./cards/TodoCard";
 
 interface BoardCardProps {
   id: string;
@@ -190,52 +191,13 @@ export default function BoardCard({
         );
       case "todo":
         return (
-          <div className="space-y-2">
-            {editableDetails.map((detail, index) => (
-              <div key={index} className="flex items-center">
-                <button
-                  className="w-5 h-5 rounded-sm border border-gray-300 flex items-center justify-center mr-2 flex-shrink-0"
-                  onClick={() => handleRemoveDetail(index)}
-                >
-                  <CheckIcon className="h-3 w-3 text-gray-500" />
-                </button>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={detail}
-                    onChange={(e) => handleDetailUpdate(index, e.target.value)}
-                    className="flex-1 text-sm text-gray-600 bg-transparent border-b border-gray-300 focus:outline-none focus:border-indigo-500"
-                  />
-                ) : (
-                  <span className="text-sm text-gray-600">{detail}</span>
-                )}
-                {isEditing && (
-                  <button
-                    className="ml-2 text-gray-400 hover:text-gray-600"
-                    onClick={() => handleRemoveDetail(index)}
-                  >
-                    <XIcon className="h-3 w-3" />
-                  </button>
-                )}
-              </div>
-            ))}
-            {isEditing && (
-              <div className="flex items-center mt-2">
-                <button className="w-5 h-5 rounded-sm border border-gray-300 flex items-center justify-center mr-2 flex-shrink-0">
-                  <PlusIcon className="h-3 w-3 text-gray-500" />
-                </button>
-                <input
-                  ref={newItemRef}
-                  type="text"
-                  value={newItem}
-                  onChange={(e) => setNewItem(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Add new item..."
-                  className="flex-1 text-sm text-gray-600 bg-transparent border-b border-gray-300 focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-            )}
-          </div>
+          <TodoCard
+            content={content}
+            details={details}
+            id={id}
+            editableDetails={editableDetails}
+            setEditableDetails={setEditableDetails}
+          />
         );
       default: // note type
         return (

@@ -1,0 +1,67 @@
+/* TodoCard animations and styles */
+
+/* Smooth transitions for todo items */
+.todo-card [data-todo-edit] {
+  transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+/* Animation for completing a todo */
+@keyframes todoComplete {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.todo-card button[aria-label="Mark as complete"]:active,
+.todo-card button[aria-label="Mark as incomplete"]:active {
+  animation: todoComplete 0.3s ease;
+}
+
+/* Fade in animation for new items */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.todo-card [data-todo-edit]:empty::after {
+  content: "New task...";
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* Custom scrollbar for the todo list */
+.todo-card::-webkit-scrollbar {
+  width: 4px;
+}
+
+.todo-card::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.todo-card::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.3);
+  border-radius: 4px;
+}
+
+.todo-card::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.5);
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .todo-card .group:hover .opacity-0 {
+    opacity: 1;
+  }
+}
