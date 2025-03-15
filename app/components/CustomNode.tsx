@@ -125,7 +125,7 @@ function CustomNode({ id, data, selected }: NodeProps<CustomNodeData>) {
         data.onUpdate(id, { details: newDetails });
       }
     },
-    [editableDetails, setEditableDetails, data.onUpdate, id]
+    [editableDetails, data, id]
   );
 
   // Handle paste for images
@@ -165,7 +165,7 @@ function CustomNode({ id, data, selected }: NodeProps<CustomNodeData>) {
         }
       }
     },
-    [data.type, editor, id, data.onUpdate, setEditableDetails]
+    [data, editor, id]
   );
 
   // Handle removing a detail item
@@ -178,7 +178,7 @@ function CustomNode({ id, data, selected }: NodeProps<CustomNodeData>) {
         data.onUpdate(id, { details: newDetails });
       }
     },
-    [editableDetails, setEditableDetails, data.onUpdate, id]
+    [editableDetails, data, id]
   );
 
   // Handle keydown events for adding new items
@@ -205,15 +205,7 @@ function CustomNode({ id, data, selected }: NodeProps<CustomNodeData>) {
         }
       }
     },
-    [
-      newItem,
-      editableDetails,
-      setEditableDetails,
-      setNewItem,
-      data.onUpdate,
-      data.onDelete,
-      id,
-    ]
+    [newItem, editableDetails, data, id]
   );
 
   // Handle image upload
@@ -242,7 +234,7 @@ function CustomNode({ id, data, selected }: NodeProps<CustomNodeData>) {
         reader.readAsDataURL(file);
       }
     },
-    [data.type, editor, id, data.onUpdate, setEditableDetails]
+    [data, editor, id]
   );
 
   // Memoize the renderCardContent function

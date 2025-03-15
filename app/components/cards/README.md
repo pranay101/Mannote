@@ -62,3 +62,58 @@ It syncs this internal state with the parent component's `editableDetails` array
 ### Styling
 
 The component uses Tailwind CSS for styling and includes custom animations defined in `TodoCard.css`.
+
+## LinkCard
+
+The LinkCard component is a Milanote-style link preview card that fetches and displays metadata for URLs.
+
+### Features
+
+- **Link Preview**: Automatically fetches and displays metadata for URLs
+- **Rich Preview**: Shows title, description, favicon, and preview image when available
+- **Interactive Controls**:
+  - Open link in new tab
+  - Copy link to clipboard
+  - Edit link URL
+- **Error Handling**: Graceful error states with retry options
+- **Loading States**: Smooth loading animations
+- **Editing Mode**: Easy URL input with validation
+- **Responsive Design**: Adapts to different screen sizes
+- **Visual Feedback**: Hover effects and animations
+
+### Usage
+
+```tsx
+<LinkCard
+  content={content}
+  details={details}
+  id={id}
+  editableDetails={editableDetails}
+  setEditableDetails={setEditableDetails}
+  onUpdate={onUpdate}
+/>
+```
+
+### Props
+
+- `content`: Title of the link
+- `details`: Array containing the URL as the first element
+- `id`: Unique identifier for the card
+- `editableDetails`: Array containing the editable URL
+- `setEditableDetails`: Function to update the editable details
+- `onUpdate`: Function to update the card data in the parent component
+
+### Implementation Details
+
+The LinkCard component fetches metadata from a server endpoint and displays it in a visually appealing way. It handles various states:
+
+1. **Editing Mode**: When no URL is provided or when editing is triggered
+2. **Loading State**: While fetching metadata
+3. **Error State**: When metadata fetching fails
+4. **Preview State**: When metadata is successfully fetched
+
+The component uses the `/api/link-metadata` endpoint to fetch metadata for URLs.
+
+### Styling
+
+The component uses Tailwind CSS exclusively for styling, with transitions and animations handled through Tailwind's utility classes.
