@@ -20,6 +20,7 @@ import { Board } from "@/lib/models";
 import { GeneralObject } from "@/types/definitions";
 import { v4 } from "uuid";
 import { toast } from "sonner";
+import Image from "next/image";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -205,9 +206,19 @@ export default function Dashboard() {
               <div className="relative">
                 <button className="flex items-center max-w-xs rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                   <span className="sr-only">Open user menu</span>
-                  <div className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white">
-                    {session?.user?.name?.charAt(0) || "U"}
-                  </div>
+                  {session?.user?.image ? (
+                    <Image
+                      src={session.user.image}
+                      alt={session.user.name || "User"}
+                      width={32}
+                      height={32}
+                      className="h-8 w-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white">
+                      {session?.user?.name?.charAt(0) || "U"}
+                    </div>
+                  )}
                 </button>
               </div>
             </div>

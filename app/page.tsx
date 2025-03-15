@@ -43,7 +43,7 @@ export default function Home() {
             GitHub
           </Link>
           <Link
-            href="#about"
+            href="/about"
             className="text-sm hover:text-indigo-600 transition-colors"
           >
             About
