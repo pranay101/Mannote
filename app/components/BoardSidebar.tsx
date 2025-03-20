@@ -9,11 +9,13 @@ import {
 interface BoardSidebarProps {
   onAddItem: (type: string) => void;
   onDeleteAll: () => void;
+  isBoardEmpty: boolean;
 }
 
 export default function BoardSidebar({
   onAddItem,
   onDeleteAll,
+  isBoardEmpty
 }: BoardSidebarProps) {
   const sidebarItems = [
     { icon: <FileTextIcon size={16} />, label: "Note", type: "note" },
@@ -47,7 +49,10 @@ export default function BoardSidebar({
       <div className="mt-auto mb-4">
         <button
           onClick={onDeleteAll}
-          className="w-full px-2 py-1.5 flex flex-col items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors text-xs"
+          disabled={isBoardEmpty}
+          className={`w-full px-2 py-1.5 flex flex-col items-center justify-center text-gray-600 ${
+            isBoardEmpty ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"
+          } transition-colors text-xs`}
         >
           <div className="mb-1">
             <Trash2Icon size={16} />
