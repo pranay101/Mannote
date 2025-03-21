@@ -357,6 +357,13 @@ function Flow({ boardId }: { boardId: string }) {
       });
   }, [board, handleSaveToLocalStorage, nodes, edges, boardId, lastSaved?.localStorage]);
 
+  const [isBoardEmpty, setIsBoardEmpty] = useState(true);
+
+  // Update the board empty state whenever nodes or edges change
+  useEffect(() => {
+    setIsBoardEmpty(nodes.length === 0 && edges.length === 0);
+  }, [nodes, edges]);
+
   const handleDeleteAll = useCallback(() => {
     if (!board) return;
     
@@ -410,7 +417,7 @@ function Flow({ boardId }: { boardId: string }) {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Board Sidebar */}
-      <BoardSidebar onAddItem={addNewItem} onDeleteAll={handleDeleteAll} />
+      <BoardSidebar onAddItem={addNewItem} onDeleteAll={handleDeleteAll} isBoardEmpty={isBoardEmpty}/>
 
       {/* Main Content */}
       <div className="ml-16 h-screen">
